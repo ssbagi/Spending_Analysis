@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Summary - April 2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --income: #10b981;
+            --expense: #ef4444;
+            --savings: #3b82f6;
+            --accent: #6366f1;
+            --accent-light: #e0e7ff;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 24px 16px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            padding: 28px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+        .header-badge {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        /* Month Navigation Tabs */
+        .tabs-container {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 8px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+        }
+
+        /* KPI Cards Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: var(--bg-card);
+            padding: 20px 24px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .card-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .card-value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .card-value.income { color: var(--income); }
+        .card-value.expense { color: var(--expense); }
+        .card-value.savings { color: var(--savings); }
+        .card-value.count { color: var(--accent); }
+        .card-subtext {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 650px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 22px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .chart-card h2 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Tables */
+        .table-card {
+            background: var(--bg-card);
+            border-radius: 14px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            overflow-x: auto;
+        }
+        .table-card h2 {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-input, .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            background: #f8fafc;
+        }
+        .search-input:focus, .filter-select:focus {
+            border-color: var(--accent);
+            background: #fff;
+        }
+        .search-input { min-width: 220px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+        .text-right { text-align: right; }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-category {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        .badge-debit {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .badge-credit {
+            background: #d1fae5;
+            color: #047857;
+        }
+        .progress-bar-bg {
+            background: #e2e8f0;
+            border-radius: 4px;
+            height: 6px;
+            width: 70px;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .progress-bar-fill {
+            background: var(--accent);
+            height: 100%;
+            border-radius: 4px;
+        }
+        .tx-table-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 32px;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>Financial Summary - April 2026</h1>
+                <p id="headerSubtitle">Monthly Spending Breakdown & Transactions for April 2026 &bull; 01-04-2026 to 30-04-2026</p>
+            </div>
+            <div class="header-badge">
+                Shreyas S Bagi &bull; HDFC Bank
+            </div>
+        </div>
+
+        <!-- Month Navigation Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="selectMonthTab('ALL')">All Months (Overview)</button><button class="tab-btn" onclick="selectMonthTab('Apr-2026')">Apr 2026</button>
+        </div>
+
+        <!-- KPI Cards Grid -->
+        <div class="kpi-grid">
+            <div class="card">
+                <div class="card-title">Total Income / Deposits</div>
+                <div class="card-value income" id="kpiIncome">₹0.00</div>
+                <div class="card-subtext" id="kpiIncomeSub">Salary &amp; Credits received</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Total Expenses / Debits</div>
+                <div class="card-value expense" id="kpiExpense">₹0.00</div>
+                <div class="card-subtext" id="kpiExpenseSub">All expenditures &amp; transfers out</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Net Savings / Cashflow</div>
+                <div class="card-value" id="kpiSavings">₹0.00</div>
+                <div class="card-subtext" id="kpiSavingsSub">Credits minus Debits</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Total Transactions</div>
+                <div class="card-value count" id="kpiTxnCount">0</div>
+                <div class="card-subtext" id="kpiCategoryCount">0 Categories Tracked</div>
+            </div>
+        </div>
+
+        <!-- Interactive Charts Grid -->
+        <div class="charts-grid">
+            <!-- Pie / Donut Chart -->
+            <div class="chart-card">
+                <h2>📊 Spending Breakdown by Category</h2>
+                <div class="chart-container">
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Top Expense Categories Ranking -->
+            <div class="chart-card">
+                <h2>🏆 Top Expense Categories (₹)</h2>
+                <div class="chart-container">
+                    <canvas id="categoryBarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Weekly Spending Trend Chart -->
+            <div class="chart-card">
+                <h2>📈 Weekly Spending Trend (₹)</h2>
+                <div class="chart-container">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Secondary Chart (Monthly Cashflow or Daily Pattern) -->
+            <div class="chart-card">
+                <h2 id="secondaryChartTitle">📅 Monthly Cashflow (Debits vs Credits)</h2>
+                <div class="chart-container">
+                    <canvas id="secondaryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Summary Breakdown Table -->
+        <div class="table-card">
+            <h2>
+                <span>📊 Category Financial Summary</span>
+                <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);" id="categoryTableSubtitle"></span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th class="text-right">Transactions</th>
+                        <th class="text-right">Debit (₹)</th>
+                        <th>% of Expenses</th>
+                        <th class="text-right">Credit (₹)</th>
+                        <th class="text-right">Net Change (₹)</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Top Regular Vendors / Recurring Payments -->
+        <div class="table-card" id="recurringCard">
+            <h2>🔁 Top Regular Vendors &amp; Recurring Payments</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Merchant / Vendor Keyword</th>
+                        <th class="text-right">Frequency</th>
+                        <th class="text-right">Total Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody id="recurringTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Searchable & Filterable Transactions Table -->
+        <div class="table-card">
+            <h2>
+                <span>📝 Categorized Transactions (<span id="txCount">0</span>)</span>
+                <div class="filters">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search narration, date, amount...">
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">All Categories</option>
+                        <option value="Credit Bill Payment">Credit Bill Payment</option><option value="Entertainment / Subscriptions">Entertainment / Subscriptions</option><option value="Food & Snacks">Food & Snacks</option><option value="General UPI / Shopping">General UPI / Shopping</option><option value="Groceries">Groceries</option><option value="Health / Medical">Health / Medical</option><option value="House Maintenance">House Maintenance</option><option value="Investments">Investments</option><option value="Petrol / Fuel">Petrol / Fuel</option><option value="Rent">Rent</option><option value="Salary / Income">Salary / Income</option><option value="Swimming">Swimming</option><option value="Tea and Snacks">Tea and Snacks</option><option value="Transport">Transport</option><option value="Uncategorized">Uncategorized</option>
+                    </select>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="Debit">Debits only</option>
+                        <option value="Credit">Credits only</option>
+                    </select>
+                </div>
+            </h2>
+            <div class="tx-table-wrap">
+                <table id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Narration</th>
+                            <th>Category</th>
+                            <th>Type</th>
+                            <th class="text-right">Amount (₹)</th>
+                            <th class="text-right">Balance (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            Generated automatically by HDFC Bank Statement Parser &bull; Clear, Interactive Family Financial Dashboard
+        </div>
+    </div>
+
+    <!-- Chart.js and Dynamic Filter Logic -->
+    <script>
+        const rawTransactions = [{"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRUNITOPIP-PAYTM.D10887095444@PTY -YESB0MCHUPI-826045261590-PAYMENTFROMP HONE", "category": "Uncategorized", "type": "Debit", "amount": 800.0, "closing": 632616.8, "chq": "0000826045261590"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "INTERESTPAIDTILL31-MAR-2026", "category": "Uncategorized", "type": "Credit", "amount": 2492.0, "closing": 634155.8, "chq": "000000000000000"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-RAKESHKUMAR MALLIK-7682986266@NYES- KKBK0008042-708679651797-PAYMENTFROMPH ONE", "category": "Transport", "type": "Debit", "amount": 44.0, "closing": 634111.8, "chq": "0000708679651797"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KA01AR0394-BMTC.KA01AR0394@CNRB-CNRB 0000681-941994667985-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 25.0, "closing": 634086.8, "chq": "0000941994667985"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRCANT3-PAYTM.D10888580971@PTY-YE SB0MCHUPI-277245564534-PAYMENTFROM PHON E", "category": "Uncategorized", "type": "Debit", "amount": 45.0, "closing": 634041.8, "chq": "0000277245564534"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRCAN-PAYTM.D10885610936@PTY-YESB0 MCHUPI-450859894690-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 25.0, "closing": 634016.8, "chq": "0000450859894690"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRCAN-PAYTM.D10885610936@PTY-YESB0 MCHUPI-287564655073-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 55.0, "closing": 632008.8, "chq": "0000287564655073"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRUNITOPIP4-PAYTM.D10887095536@P TY-YESB0MCHUPI-123090501817-PAYMENT FROM PHONE", "category": "Uncategorized", "type": "Debit", "amount": 600.0, "closing": 633416.8, "chq": "0000123090501817"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRCANT3-PAYTM.D10888580971@PTY-YE SB0MCHUPI-297914688649-PAYMENTFROM PHON E", "category": "Uncategorized", "type": "Debit", "amount": 25.0, "closing": 631983.8, "chq": "0000297914688649"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-YESVEGETABLE MARKET-VYAPAR.17569346 3854@HDFCBANK-HDFC0MERUPI-017279030472-P AYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 183.0, "closing": 631800.8, "chq": "0000017279030472"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BMTCBUS KA57F2462-KA57F2462@CNRB-CN RB0000033-577070464078-PAYMENTFROMPHON E", "category": "Transport", "type": "Debit", "amount": 23.0, "closing": 631777.8, "chq": "0000577070464078"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-MAYURABAKERYAND SW-OMBK.AAGQ11437P 8ZHR5KXC6@MBK-PPIW0881822-399557304422-P AYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 114.0, "closing": 631663.8, "chq": "0000399557304422"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SREEKANTHKUMAR SAL-7975017536@PTAX IS-SBIN0016234-814485178474-PAYMENTFROM PHONE", "category": "Uncategorized", "type": "Debit", "amount": 51.0, "closing": 631612.8, "chq": "0000814485178474"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KABULI MUDULI-BHARATPE.9Z0M0J0P6X030 593@UNITYPE-UNBA000BHPE-779647648434-PAY TOBHARATPEME", "category": "Food & Snacks", "type": "Debit", "amount": 10.0, "closing": 631602.8, "chq": "0000779647648434"}, {"date": "01-04-2026", "isoDate": "2026-04-01", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BLRUNITPHAR-PAYTM.D87096539@PTA-UT IB0000022-520766143093-PAYMENTFROMPHON E", "category": "Uncategorized", "type": "Debit", "amount": 553.0, "closing": 632063.8, "chq": "0000520766143093"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KA01AR0381-BMTC.KA01AR0381@CNRB-CNRB 0000681-987255107190-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 20.0, "closing": 631325.8, "chq": "0000987255107190"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-GOUTAMCHARAN DAS-9741897978@KOTAK81 1-KKBK0008155-806559248372-PAYMENTFROM PHONE", "category": "Transport", "type": "Debit", "amount": 52.0, "closing": 631550.8, "chq": "0000806559248372"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KA01AR1680-BMTC.KA01AR1680@CNRB-CNRB 0000681-571606194492-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 20.0, "closing": 631530.8, "chq": "0000571606194492"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-237671120159-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 185.0, "closing": 631345.8, "chq": "0000237671120159"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-MSBABAIHOTEL-IBKPOS.EP149996@ICIC I-ICIC0000004-484911103635-PAYMENTFROM PHONE", "category": "Food & Snacks", "type": "Debit", "amount": 60.0, "closing": 631265.8, "chq": "0000484911103635"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-MSBABAIHOTEL-IBKPOS.EP149996@ICIC I-ICIC0000004-996529661586-PAYMENTFROM PHONE", "category": "Food & Snacks", "type": "Debit", "amount": 70.0, "closing": 631195.8, "chq": "0000996529661586"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SHANTHRAJ K-Q276102246@YBL-YESB0YBLU PI-919279036071-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 20.0, "closing": 630985.8, "chq": "0000919279036071"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SATHYASAIFILLINGS-PAYTM.D16484852 068@PTY-YESB0MCHUPI-229499410065-PAYMENT FROMPHONE", "category": "Petrol / Fuel", "type": "Debit", "amount": 2200.67, "closing": 628785.13, "chq": "0000229499410065"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-FAMILIESHYPERMART-Q433928782@YBL-Y ESB0YBLUPI-283787427607-PAYMENTFROMPHO NE", "category": "Food & Snacks", "type": "Debit", "amount": 2253.0, "closing": 626532.13, "chq": "0000283787427607"}, {"date": "02-04-2026", "isoDate": "2026-04-02", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANNARANGEGOWDA T-Q955819067@YBL-YES B0YBLUPI-333729996321-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 190.0, "closing": 631005.8, "chq": "0000333729996321"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-YERIPALLI APPALARAJ-APPALARAJUYERIP ALLI955@IBL-SBIN0021994-470093808105-PAY MENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 1500.0, "closing": 624922.13, "chq": "0000470093808105"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-238689135785-P AYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 20.0, "closing": 626422.13, "chq": "0000238689135785"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-265655866592-P AYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 90.0, "closing": 626442.13, "chq": "0000265655866592"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KABULI MUDULI-BHARATPE.9Z0M0J0P6X030 593@UNITYPE-UNBA000BHPE-084023951411-PAY TOBHARATPEME", "category": "Food & Snacks", "type": "Debit", "amount": 10.0, "closing": 624912.13, "chq": "0000084023951411"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANTHOSHAKUMARA SHE-PAYTMQR72VPS6@P TYS-YESB0PTMUPI-558078721472-PAYMENTFRO MPHONE", "category": "Uncategorized", "type": "Debit", "amount": 25.0, "closing": 624787.13, "chq": "0000558078721472"}, {"date": "03-04-2026", "isoDate": "2026-04-03", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANTHOSHAKUMARA SHE-PAYTMQR72VPS6@P TYS-YESB0PTMUPI-889005778963-PAYMENTFRO MPHONE", "category": "Transport", "type": "Debit", "amount": 100.0, "closing": 624812.13, "chq": "0000889005778963"}, {"date": "04-04-2026", "isoDate": "2026-04-04", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-YERIPALLI APPALARAJ-APPALARAJUYERIP ALLI955@IBL-SBIN0021994-396339895052-PAY MENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 2000.0, "closing": 622787.13, "chq": "0000396339895052"}, {"date": "04-04-2026", "isoDate": "2026-04-04", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-088569513055-P AYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 90.0, "closing": 622697.13, "chq": "0000088569513055"}, {"date": "04-04-2026", "isoDate": "2026-04-04", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-NALABHIMAPAKAM KAMMA-PAYTMQR28100505 01011DVBY38YKIA5@PAYTM-YESB0PTMUPI-59410 9973847-PAYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 110.0, "closing": 622587.13, "chq": "0000594109973847"}, {"date": "04-04-2026", "isoDate": "2026-04-04", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KABULI MUDULI-BHARATPE.9Z0M0J0P6X030 593@UNITYPE-UNBA000BHPE-924829167726-PAY TOBHARATPEME", "category": "Food & Snacks", "type": "Debit", "amount": 10.0, "closing": 622577.13, "chq": "0000924829167726"}, {"date": "04-04-2026", "isoDate": "2026-04-04", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-646343507355-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 30.0, "closing": 622547.13, "chq": "0000646343507355"}, {"date": "05-04-2026", "isoDate": "2026-04-05", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-PRASHANTHYADAV POTHU-PAYTM.S1S99M7@P TY-YESB0MCHUPI-041973413767-PAYMENT FROM PHONE", "category": "Uncategorized", "type": "Debit", "amount": 230.0, "closing": 622172.13, "chq": "0000041973413767"}, {"date": "05-04-2026", "isoDate": "2026-04-05", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KMSVEGETABLESAND F-PAYTMQR6E5IT4@P TYS-YESB0PTMUPI-083538417266-PAYMENTFRO MPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 128.0, "closing": 622402.13, "chq": "0000083538417266"}, {"date": "05-04-2026", "isoDate": "2026-04-05", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SHANTESHBBAGI-9449278574@YBL-SBIN0 000909-962064847390-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 95000.0, "closing": 527162.13, "chq": "0000962064847390"}, {"date": "05-04-2026", "isoDate": "2026-04-05", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KABULI MUDULI-BHARATPE.9Z0M0J0P6X030 593@UNITYPE-UNBA000BHPE-664493935518-PAY TOBHARATPEME", "category": "Food & Snacks", "type": "Debit", "amount": 10.0, "closing": 622162.13, "chq": "0000664493935518"}, {"date": "05-04-2026", "isoDate": "2026-04-05", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-464326897011-PAYMENTFROMPHONE", "category": "Tea and Snacks", "type": "Debit", "amount": 17.0, "closing": 622530.13, "chq": "0000464326897011"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-823596932222-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 180.0, "closing": 526982.13, "chq": "0000823596932222"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-RAVIKUMARA R-RAVIKU4071@AXL-IOBA000 0329-696533349752-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 78.0, "closing": 526904.13, "chq": "0000696533349752"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BMTCBUS KA57F4594-KA57F4594@CNRB-CN RB0000033-357166968507-PAYMENTFROMPHON E", "category": "Transport", "type": "Debit", "amount": 12.0, "closing": 526892.13, "chq": "0000357166968507"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-905896265142-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 115.0, "closing": 526777.13, "chq": "0000905896265142"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BMTCBUS KA57F1100-KA57F1100@CNRB-CN RB0000681-495002195875-PAYMENTFROMPHON E", "category": "Transport", "type": "Debit", "amount": 20.0, "closing": 526757.13, "chq": "0000495002195875"}, {"date": "06-04-2026", "isoDate": "2026-04-06", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-809726907818-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 156.0, "closing": 526601.13, "chq": "0000809726907818"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-UBERINDIASYSTEMS P-UBER1.RZP@HDFCB ANK-HDFC0000001-103066596336-REFUNDFOR UBERIN", "category": "Transport", "type": "Credit", "amount": 1.0, "closing": 508601.13, "chq": "0000103066596336"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-HMSIDDESH-9620778824@AXL-FDRL00015 85-814051512359-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 210.0, "closing": 508391.13, "chq": "0000814051512359"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "NEFTDR-ICIC0000106-VAASTUDEW FLOWER-NE TBANK, MUM-HDFCH00915814825-HDFC04474E2A C8C5", "category": "House Maintenance", "type": "Debit", "amount": 3000.0, "closing": 508601.13, "chq": "HDFCH00915814825"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-UBERINDIASYSTEMS P-UBER1.RZP@HDFCB ANK-HDFC0MERUPI-200547782471-UBERRIDE", "category": "Transport", "type": "Debit", "amount": 1.0, "closing": 508600.13, "chq": "0000200547782471"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SADHANA AK-7899664828-2@IBL-SBIN004 0117-571753513998-PAYMENTFROMPHONE", "category": "Rent", "type": "Debit", "amount": 15000.0, "closing": 511601.13, "chq": "0000571753513998"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-342644302341-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 508251.13, "chq": "0000342644302341"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-BAGMANE-BAGMANE.63010747@HDFCBANK-HD FC0MERUPI-603783100586-PAYMENTFROM PHON E", "category": "Transport", "type": "Debit", "amount": 708.0, "closing": 507543.13, "chq": "0000603783100586"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-SOMASHEKHAR R-Q153524740@YBL-YESB0Y BLUPI-083622166499-PAYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 210.0, "closing": 507333.13, "chq": "0000083622166499"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-FAMILIESHYPERMART-Q737252971@YBL-Y ESB0YBLUPI-198158756777-PAYMENTFROMPHO NE", "category": "Food & Snacks", "type": "Debit", "amount": 5169.0, "closing": 502164.13, "chq": "0000198158756777"}, {"date": "07-04-2026", "isoDate": "2026-04-07", "monthYear": "Apr-2026", "week": 1, "narration": "UPI-KA01AR3910-BMTC.KA01AR3910@CNRB-CNRB 0000681-444312451657-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 20.0, "closing": 508371.13, "chq": "0000444312451657"}, {"date": "08-04-2026", "isoDate": "2026-04-08", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-413133893425-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 162.0, "closing": 502002.13, "chq": "0000413133893425"}, {"date": "08-04-2026", "isoDate": "2026-04-08", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-GIRIDHARISAHOO-6372612061@YBL-KKBK0 008121-544978837954-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 75.0, "closing": 501927.13, "chq": "0000544978837954"}, {"date": "08-04-2026", "isoDate": "2026-04-08", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-863602315223-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 501807.13, "chq": "0000863602315223"}, {"date": "08-04-2026", "isoDate": "2026-04-08", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-15240APOLLO PHARMAC-PAYTM-83510741@ PTYS-YESB0PTMUPI-865904241475-PAYMENTFR OMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 1082.99, "closing": 500724.14, "chq": "0000865904241475"}, {"date": "08-04-2026", "isoDate": "2026-04-08", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-PALAGIRI BALASUBBAR-Q035890289@YBL- YESB0YBLUPI-886182042345-PAYMENTFROMPH ONE", "category": "Uncategorized", "type": "Debit", "amount": 596.0, "closing": 500128.14, "chq": "0000886182042345"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-2 44821213807-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 499928.14, "chq": "0000244821213807"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SUROJ DEY-SUROJDEYSUROJDEY0@OKICICI- CNRB0000033-481043421346-PAYMENTFROMPH ONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 500088.14, "chq": "0000481043421346"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-842052004223-HUNGERBOXORDER B", "category": "Food & Snacks", "type": "Debit", "amount": 80.0, "closing": 499968.14, "chq": "0000842052004223"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-7 11988603057-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 500048.14, "chq": "0000711988603057"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-PALAGIRI BALASUBBAR-Q035890289@YBL- YESB0YBLUPI-957921034107-PAYMENTFROMPH ONE", "category": "Uncategorized", "type": "Debit", "amount": 60.0, "closing": 499639.14, "chq": "0000957921034107"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-PALAGIRI BALASUBBAR-Q035890289@YBL- YESB0YBLUPI-608155821500-PAYMENTFROMPH ONE", "category": "Uncategorized", "type": "Debit", "amount": 70.0, "closing": 499699.14, "chq": "0000608155821500"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-BINDUPV-8722444894@IBL-CNRB0000033 -937419654782-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 230.0, "closing": 499409.14, "chq": "0000937419654782"}, {"date": "09-04-2026", "isoDate": "2026-04-09", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-GARIMA PANDE-PAYTMQR6CW65V@PTYS-YESB 0PTMUPI-154287628052-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 159.0, "closing": 499769.14, "chq": "0000154287628052"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-PHONEPE-SV2512112238344230219611@YBL -YESB0YBLUPI-545743544442-PAYMENTFROMP HONE", "category": "Uncategorized", "type": "Debit", "amount": 404.0, "closing": 498366.14, "chq": "0000545743544442"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-ATOZ ENTERPRISES-PAYTMQR60UOV5@PTY S-YESB0PTMUPI-738261112699-PAYMENTFROM PHONE", "category": "Uncategorized", "type": "Debit", "amount": 35.0, "closing": 498331.14, "chq": "0000738261112699"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SRIGURU RAGHAVENDRA-Q201985284@YBL- YESB0YBLUPI-811630316939-PAYMENTFROMPH ONE", "category": "Uncategorized", "type": "Debit", "amount": 20.0, "closing": 498822.14, "chq": "0000811630316939"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SRIGURU RAGHAVENDRA-Q201985284@YBL- YESB0YBLUPI-764514364597-PAYMENTFROMPH ONE", "category": "Transport", "type": "Debit", "amount": 52.0, "closing": 498770.14, "chq": "0000764514364597"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-THANUSHREER N-THANUSHREENAGARAJTHAN U-1@OKAXIS-CNRB0000033-465602612500-PAYM ENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 567.0, "closing": 498842.14, "chq": "0000465602612500"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SRIMATHA VAIBHAVA-PAYTM.S1O5SMU@PTY -YESB0MCHUPI-334432683485-PAYMENTFROMP HONE", "category": "Uncategorized", "type": "Debit", "amount": 150.0, "closing": 498147.14, "chq": "0000334432683485"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SHEKARH MOGERA-Q666596613@YBL-YESB0 YBLUPI-383850326290-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 55.0, "closing": 498092.14, "chq": "0000383850326290"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-KA01AR2961-BMTC.KA01AR2961@CNRB-CNRB 0000681-215757382957-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 45.0, "closing": 498047.14, "chq": "0000215757382957"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-DEVAGUDI VYSHNAVI-VYSHU.1999@YBL-ICI C0000674-379711230142-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 46.0, "closing": 498001.14, "chq": "0000379711230142"}, {"date": "12-04-2026", "isoDate": "2026-04-12", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-BMTCBUS KA57F5970-KA57F5970@CNRB-CN RB0000033-425809790138-PAYMENTFROMPHON E", "category": "Transport", "type": "Debit", "amount": 34.0, "closing": 498297.14, "chq": "0000425809790138"}, {"date": "14-04-2026", "isoDate": "2026-04-14", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-VIMALMS-9895943110@YBL-CNRB0000000 -454285591566-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 50.0, "closing": 497951.14, "chq": "0000454285591566"}, {"date": "14-04-2026", "isoDate": "2026-04-14", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-577501394898-HUNGERBOXORDER B", "category": "Food & Snacks", "type": "Debit", "amount": 80.0, "closing": 497871.14, "chq": "0000577501394898"}, {"date": "14-04-2026", "isoDate": "2026-04-14", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-436797365827-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 497751.14, "chq": "0000436797365827"}, {"date": "14-04-2026", "isoDate": "2026-04-14", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-647004005668-EXPRESS", "category": "Food & Snacks", "type": "Credit", "amount": 80.0, "closing": 497831.14, "chq": "0000647004005668"}, {"date": "14-04-2026", "isoDate": "2026-04-14", "monthYear": "Apr-2026", "week": 2, "narration": "UPI-SUBRAMANYA DILEEP-PAYTM.S1ZV0VO@PTY- YESB0MCHUPI-328688696095-PAYMENTFROM PH ONE", "category": "Uncategorized", "type": "Debit", "amount": 130.0, "closing": 497701.14, "chq": "0000328688696095"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-621894302327-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 497232.14, "chq": "0000621894302327"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RUDRANARAYAN SAHOO-6371491641@PTSBI -KKBK0008042-036515099326-PAYMENTFROMP HONE", "category": "Transport", "type": "Debit", "amount": 59.0, "closing": 497352.14, "chq": "0000036515099326"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-081592231292-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 290.0, "closing": 497411.14, "chq": "0000081592231292"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-GOOGLE PLAY-PLAYSTORE@AXISBANK-UTIB0 000553-448026351056-MANDATEEXECUTE", "category": "Entertainment / Subscriptions", "type": "Debit", "amount": 2000.0, "closing": 495152.14, "chq": "0000448026351056"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-NEWUDUPI GARDEN-OMBK.AAFM23046Z6VV1 5FHZE@MBK-PPIW0881822-555872739467-PAYME NTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 50.0, "closing": 497152.14, "chq": "0000555872739467"}, {"date": "15-04-2026", "isoDate": "2026-04-15", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-NEWUDUPI GARDEN-OMBK.AAFM23046Z6VV1 5FHZE@MBK-PPIW0881822-844488800225-PAYME NTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 30.0, "closing": 497202.14, "chq": "0000844488800225"}, {"date": "16-04-2026", "isoDate": "2026-04-16", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-MRKRAVI KUAMAR-Q661105194@YBL-YESB 0YBLUPI-721004085282-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 50.0, "closing": 495102.14, "chq": "0000721004085282"}, {"date": "17-04-2026", "isoDate": "2026-04-17", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-ZEESWIMACADEMY-MAB.037244030500329 @AXISBANK-UTIB0000100-017032238459-PAYME NTFROMPHONE", "category": "Swimming", "type": "Debit", "amount": 9000.0, "closing": 486102.14, "chq": "0000017032238459"}, {"date": "18-04-2026", "isoDate": "2026-04-18", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-708464564705-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 540.0, "closing": 485562.14, "chq": "0000708464564705"}, {"date": "18-04-2026", "isoDate": "2026-04-18", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-PREETHIK P-PAYTM.S1UZE8O@PTY-YESB0M CHUPI-157532821555-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 100.0, "closing": 485462.14, "chq": "0000157532821555"}, {"date": "18-04-2026", "isoDate": "2026-04-18", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-UMESH BHATT-PAYTMQR6FHAH1@PTYS-YESB0 PTMUPI-473159376208-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 60.0, "closing": 485402.14, "chq": "0000473159376208"}, {"date": "19-04-2026", "isoDate": "2026-04-19", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-FAMILIESHYPERMART-Q737252971@YBL-Y ESB0YBLUPI-422773831355-PAYMENTFROMPHO NE", "category": "Food & Snacks", "type": "Debit", "amount": 308.0, "closing": 485094.14, "chq": "0000422773831355"}, {"date": "19-04-2026", "isoDate": "2026-04-19", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-DOMINOSPIZZA-DOMINOSPIZZA.42489573@ HDFCBANK-HDFC0MERUPI-973561617332-PAYMEN TFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 363.82, "closing": 484730.32, "chq": "0000973561617332"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-GOUTAMCHARAN DAS-9741897978@KOTAK81 1-KKBK0008155-604134865105-PAYMENTFROM PHONE", "category": "Transport", "type": "Debit", "amount": 70.0, "closing": 484660.32, "chq": "0000604134865105"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-217466143750-PAYM ENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 484620.32, "chq": "0000217466143750"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-543250578438-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 115.0, "closing": 484505.32, "chq": "0000543250578438"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-872552997869-PAYM ENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 484465.32, "chq": "0000872552997869"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RAMYASBIRYANIHOUS-GPAY-1219121877 5@OKBIZAXIS-UTIB0000553-673818037726-PAY MENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 484345.32, "chq": "0000673818037726"}, {"date": "20-04-2026", "isoDate": "2026-04-20", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-GROWWINVESTTECH PV-GROWW.BRK@VALID HDFC-HDFC0MERUPI-055502406968-PAIDVIAE LEMENTS", "category": "Investments", "type": "Debit", "amount": 40000.0, "closing": 444345.32, "chq": "0000055502406968"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-618275786532-HUNGERBOXORDER B", "category": "Food & Snacks", "type": "Debit", "amount": 100.0, "closing": 444178.32, "chq": "0000618275786532"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RUDRANARAYAN SAHOO-6371491641@PTSBI -KKBK0008042-400494610609-PAYMENTFROMP HONE", "category": "Transport", "type": "Debit", "amount": 67.0, "closing": 444278.32, "chq": "0000400494610609"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-DAALCHINI-PAYTM-7289005034@PTYS-YESB 0PTMUPI-808300152031-ORDER958A708836394", "category": "Food & Snacks", "type": "Debit", "amount": 10.0, "closing": 444168.32, "chq": "0000808300152031"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-974126487 526-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 550.0, "closing": 443618.32, "chq": "0000974126487526"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RAVISHANKARKUMAR SH-RAVISHANKAR1768 6@AXL-UBIN0911429-606999801240-PAYMENTF ROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 40.0, "closing": 443573.32, "chq": "0000606999801240"}, {"date": "21-04-2026", "isoDate": "2026-04-21", "monthYear": "Apr-2026", "week": 3, "narration": "UPI-RAVISHANKARKUMAR SH-RAVISHANKAR1768 6@AXL-UBIN0911429-470155197928-PAYMENTF ROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 5.0, "closing": 443613.32, "chq": "0000470155197928"}, {"date": "22-04-2026", "isoDate": "2026-04-22", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-581875085626-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 508.0, "closing": 443065.32, "chq": "0000581875085626"}, {"date": "22-04-2026", "isoDate": "2026-04-22", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-ANJINAGOWDA-8553858784@AXL-BARB0BRIG AD-842984501865-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 54.0, "closing": 443011.32, "chq": "0000842984501865"}, {"date": "22-04-2026", "isoDate": "2026-04-22", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SHIVAKUMAR AR-PAYTM.S1T37HX@PTY-YESB 0MCHUPI-002301816582-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 200.0, "closing": 442811.32, "chq": "0000002301816582"}, {"date": "22-04-2026", "isoDate": "2026-04-22", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-DECATHLON-DECATHLON@YBL-YESB0YBLUPI- 693978833868-PAYMENTFOR260198", "category": "General UPI / Shopping", "type": "Debit", "amount": 198.0, "closing": 442613.32, "chq": "0000693978833868"}, {"date": "23-04-2026", "isoDate": "2026-04-23", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SALLA LAKSHMIPATHI-7411112868@SUPERY ES-UTIB0001203-482246608036-PAYMENTFROM PHONE", "category": "Transport", "type": "Debit", "amount": 56.0, "closing": 442557.32, "chq": "0000482246608036"}, {"date": "23-04-2026", "isoDate": "2026-04-23", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-962752574220-HUNGERBOXORDER P", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 442437.32, "chq": "0000962752574220"}, {"date": "23-04-2026", "isoDate": "2026-04-23", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-RAKESHSAIN-PAYTMQR2810050501011B7AB Y6W86VD@PAYTM-YESB0PTMUPI-388408020352-P AYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 90.0, "closing": 442347.32, "chq": "0000388408020352"}, {"date": "24-04-2026", "isoDate": "2026-04-24", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-RANJANKUMAR BEHERA-8598829410@IBL-B KID0005498-795733839199-PAYMENTFROMPHO NE", "category": "Transport", "type": "Debit", "amount": 50.0, "closing": 442297.32, "chq": "0000795733839199"}, {"date": "24-04-2026", "isoDate": "2026-04-24", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-934630449454-HUNGERBOXORDER B", "category": "Food & Snacks", "type": "Debit", "amount": 80.0, "closing": 442217.32, "chq": "0000934630449454"}, {"date": "24-04-2026", "isoDate": "2026-04-24", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SOMASHEKHAR R-Q153524740@YBL-YESB0Y BLUPI-411741834946-PAYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 100.0, "closing": 442117.32, "chq": "0000411741834946"}, {"date": "25-04-2026", "isoDate": "2026-04-25", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-AMAZON INDIA-AMAZON@YAPL-YESB0APLUPI -095899940504-YOUAREPAYINGFOR", "category": "General UPI / Shopping", "type": "Debit", "amount": 2104.0, "closing": 440013.32, "chq": "0000095899940504"}, {"date": "25-04-2026", "isoDate": "2026-04-25", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-MADANA R-HAVOCMADHAN39-1@OKAXIS-HDFC 0003637-915844079279-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 590.0, "closing": 439423.32, "chq": "0000915844079279"}, {"date": "26-04-2026", "isoDate": "2026-04-26", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SUMAN RAMU-SRAM29-1@OKSBI-SBIN00112 83-740863608635-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 1000.0, "closing": 438423.32, "chq": "0000740863608635"}, {"date": "26-04-2026", "isoDate": "2026-04-26", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-058494250250-PAYMENTFROM PHONE", "category": "Groceries", "type": "Debit", "amount": 650.0, "closing": 437773.32, "chq": "0000058494250250"}, {"date": "26-04-2026", "isoDate": "2026-04-26", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-PAAKASHALA HOSAKOTE-PAYTM.S1KP549@PT Y-YESB0MCHUPI-473915518880-PAYMENTFROM PHONE", "category": "Food & Snacks", "type": "Debit", "amount": 568.0, "closing": 437205.32, "chq": "0000473915518880"}, {"date": "26-04-2026", "isoDate": "2026-04-26", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SATHYASAIFILLINGS-PAYTM.D16484852 068@PTY-YESB0MCHUPI-707464308029-PAYMENT FROMPHONE", "category": "Petrol / Fuel", "type": "Debit", "amount": 1000.0, "closing": 436205.32, "chq": "0000707464308029"}, {"date": "26-04-2026", "isoDate": "2026-04-26", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-SAVITHRAMMA MULE-PAYTM.S21QW0G@PTY-Y ESB0MCHUPI-456863653381-PAYMENTFROM PHO NE", "category": "Uncategorized", "type": "Debit", "amount": 338.0, "closing": 435867.32, "chq": "0000456863653381"}, {"date": "27-04-2026", "isoDate": "2026-04-27", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-N AMARESH-NAMARESH1989@OKAXIS-HDFC00 01037-259192288767-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 48.0, "closing": 435819.32, "chq": "0000259192288767"}, {"date": "27-04-2026", "isoDate": "2026-04-27", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-KAMALESH K-PAYTMQR6QCMUI@PTYS-YESB0P TMUPI-079720550179-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 170.0, "closing": 435649.32, "chq": "0000079720550179"}, {"date": "28-04-2026", "isoDate": "2026-04-28", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-AMIYAKUMAR SAHOO-7894183203@AXL-SBI N0013581-658634445253-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 435609.32, "chq": "0000658634445253"}, {"date": "28-04-2026", "isoDate": "2026-04-28", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-EATGOOD TECHNOLOGIES-ETPL1.EASEBUZZ1 .EASEBUZZ@YPBIZ-YESB0MGSUPI-730755909472 -PAYMENTOFHUNGERB", "category": "Food & Snacks", "type": "Debit", "amount": 120.0, "closing": 435489.32, "chq": "0000730755909472"}, {"date": "28-04-2026", "isoDate": "2026-04-28", "monthYear": "Apr-2026", "week": 4, "narration": "UPI-RAMYASBIRYANIHOUS-GPAY-1219303573 0@OKBIZAXIS-UTIB0000553-223688315908-PAY MENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 60.0, "closing": 435429.32, "chq": "0000223688315908"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-SURESHKUMARA N-ANSURESHAKUMARA@YBL -CNRB0000000-562784536303-PAYMENTFROMP HONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 435389.32, "chq": "0000562784536303"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-D MOHAN-PAYTMQR61OAJP@PTYS-YESB0PTMU PI-539230049267-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 60.0, "closing": 435329.32, "chq": "0000539230049267"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-EATGOOD TECHNOLOGIES-ETPL1.EASEBUZZ1 .EASEBUZZ@YPBIZ-YESB0MGSUPI-446366897874 -PAYMENTOFHUNGERB", "category": "Food & Snacks", "type": "Debit", "amount": 80.0, "closing": 435249.32, "chq": "0000446366897874"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-SOMASHEKHAR R-Q153524740@YBL-YESB0Y BLUPI-962897634458-PAYMENTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 100.0, "closing": 435149.32, "chq": "0000962897634458"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-RAMDEV MEDICAL-PAYTMQR1UQXX3FTFA@PAY TM-YESB0PTMUPI-729195399239-PAYMENT FROM PHONE", "category": "Health / Medical", "type": "Debit", "amount": 960.0, "closing": 434189.32, "chq": "0000729195399239"}, {"date": "29-04-2026", "isoDate": "2026-04-29", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-CRED CLUB-CRED.CLUB@AXISB-UTIB000011 4-378178708394-PAYMENTONCRED", "category": "Credit Bill Payment", "type": "Debit", "amount": 2833.0, "closing": 431356.32, "chq": "0000378178708394"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "NEFTCR-DEUT0797BGL-IBMINDIAPRIVATELI MITED-SHREYASSBAGI-DEUTH02612067409SA LARYAPR", "category": "Salary / Income", "type": "Credit", "amount": 256281.79, "closing": 687638.11, "chq": "DEUTH02612067409"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-AJITHKUMAR-0439120000486@AXL-CNRB00 00033-258913846052-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 40.0, "closing": 687598.11, "chq": "0000258913846052"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-SATHYASAIFILLINGS-PAYTM.D16484852 068@PTY-YESB0MCHUPI-346465188103-PAYMENT FROMPHONE", "category": "Petrol / Fuel", "type": "Debit", "amount": 500.0, "closing": 686363.11, "chq": "0000346465188103"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-614530812 509-PAYMENTFROMPHONE", "category": "Transport", "type": "Debit", "amount": 550.0, "closing": 687048.11, "chq": "0000614530812509"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-NEWUDUPI GARDEN-OMBK.AAFM23046Z6VV1 5FHZE@MBK-PPIW0881822-419527314891-PAYME NTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 5.0, "closing": 686963.11, "chq": "0000419527314891"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-DILEEPS-Q293467537@YBL-YESB0YBLUPI- 245125339399-PAYMENTFROMPHONE", "category": "Uncategorized", "type": "Debit", "amount": 100.0, "closing": 686863.11, "chq": "0000245125339399"}, {"date": "30-04-2026", "isoDate": "2026-04-30", "monthYear": "Apr-2026", "week": 5, "narration": "UPI-NEWUDUPI GARDEN-OMBK.AAFM23046Z6VV1 5FHZE@MBK-PPIW0881822-200236852423-PAYME NTFROMPHONE", "category": "Food & Snacks", "type": "Debit", "amount": 80.0, "closing": 686968.11, "chq": "0000200236852423"}];
+        const allMonthsList = ["Apr-2026"];
+        const palette = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#14B8A6", "#F97316", "#6366F1", "#84CC16", "#06B6D4", "#E11D48", "#059669", "#D97706", "#7C3AED", "#DB2777", "#0D9488", "#EA580C", "#4F46E5", "#65A30D", "#0891B2", "#BE123C", "#047857", "#B45309"];
+
+        let currentSelectedMonth = "ALL";
+        let pieChart = null;
+        let barChart = null;
+        let weeklyChart = null;
+        let secondaryChart = null;
+
+        function getMonthTransactions(monthId) {
+            if (monthId === "ALL") {
+                return rawTransactions;
+            }
+            return rawTransactions.filter(tx => tx.monthYear === monthId);
+        }
+
+        function selectMonthTab(monthId) {
+            currentSelectedMonth = monthId;
+
+            // Update Tab Active State
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if ((monthId === "ALL" && btn.innerText.includes("All Months")) ||
+                    (monthId !== "ALL" && btn.getAttribute("onclick").includes(monthId))) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Refresh entire dashboard view
+            updateDashboard(monthId);
+        }
+
+        function updateDashboard(monthId) {
+            const txs = getMonthTransactions(monthId);
+
+            // 1. Compute KPIs
+            let totalDebit = 0;
+            let totalCredit = 0;
+            txs.forEach(t => {
+                if (t.type === "Debit") totalDebit += t.amount;
+                else if (t.type === "Credit") totalCredit += t.amount;
+            });
+            const netSavings = totalCredit - totalDebit;
+
+            document.getElementById('kpiIncome').innerText = '₹' + totalCredit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('kpiExpense').innerText = '₹' + totalDebit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+            const kpiSavings = document.getElementById('kpiSavings');
+            if (netSavings >= 0) {
+                kpiSavings.innerText = '₹' + netSavings.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                kpiSavings.style.color = 'var(--income)';
+                document.getElementById('kpiSavingsSub').innerText = 'Net Positive Cashflow';
+            } else {
+                kpiSavings.innerText = '-₹' + Math.abs(netSavings).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                kpiSavings.style.color = 'var(--expense)';
+                document.getElementById('kpiSavingsSub').innerText = 'Net Negative Cashflow';
+            }
+
+            document.getElementById('kpiTxnCount').innerText = txs.length;
+
+            // 2. Category Aggregations
+            const catDebitMap = {};
+            const catCreditMap = {};
+            const catCountMap = {};
+
+            txs.forEach(t => {
+                catCountMap[t.category] = (catCountMap[t.category] || 0) + 1;
+                if (t.type === "Debit") {
+                    catDebitMap[t.category] = (catDebitMap[t.category] || 0) + t.amount;
+                } else if (t.type === "Credit") {
+                    catCreditMap[t.category] = (catCreditMap[t.category] || 0) + t.amount;
+                }
+            });
+
+            const allCatsInView = Array.from(new Set(txs.map(t => t.category))).sort();
+            document.getElementById('kpiCategoryCount').innerText = `${allCatsInView.length} Categories Active`;
+
+            // Sort categories by debit amount descending for chart
+            const sortedDebitCats = Object.keys(catDebitMap).sort((a, b) => catDebitMap[b] - catDebitMap[a]);
+            const pieLabels = sortedDebitCats;
+            const pieValues = sortedDebitCats.map(c => Math.round(catDebitMap[c] * 100) / 100);
+            const chartColors = pieLabels.map((_, i) => palette[i % palette.length]);
+
+            // 3. Update Pie / Donut Chart
+            if (pieChart) pieChart.destroy();
+            const ctxPie = document.getElementById('categoryPieChart').getContext('2d');
+            pieChart = new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieValues,
+                        backgroundColor: chartColors,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { boxWidth: 12, font: { size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.parsed || 0;
+                                    const total = pieValues.reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ₹${val.toLocaleString('en-IN')} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 4. Update Category Bar Chart (Top 8)
+            if (barChart) barChart.destroy();
+            const topCats = sortedDebitCats.slice(0, 8);
+            const topCatValues = topCats.map(c => catDebitMap[c]);
+            const ctxBar = document.getElementById('categoryBarChart').getContext('2d');
+            barChart = new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: topCats,
+                    datasets: [{
+                        label: 'Debit (₹)',
+                        data: topCatValues,
+                        backgroundColor: chartColors.slice(0, 8),
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
+                        }
+                    }
+                }
+            });
+
+            // 5. Update Weekly Spending Chart
+            const weeklyMap = {};
+            txs.forEach(t => {
+                if (t.type === "Debit") {
+                    const key = monthId === "ALL" ? `${t.monthYear} W${t.week}` : `Week ${t.week}`;
+                    weeklyMap[key] = (weeklyMap[key] || 0) + t.amount;
+                }
+            });
+            const weeklyLabels = Object.keys(weeklyMap);
+            const weeklyValues = weeklyLabels.map(k => Math.round(weeklyMap[k] * 100) / 100);
+
+            if (weeklyChart) weeklyChart.destroy();
+            const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+            weeklyChart = new Chart(ctxWeekly, {
+                type: 'line',
+                data: {
+                    labels: weeklyLabels,
+                    datasets: [{
+                        label: 'Weekly Spending (₹)',
+                        data: weeklyValues,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '₹' + v.toLocaleString('en-IN') }
+                        }
+                    }
+                }
+            });
+
+            // 6. Update Secondary Chart
+            if (secondaryChart) secondaryChart.destroy();
+            const ctxSecondary = document.getElementById('secondaryChart').getContext('2d');
+            const secondaryTitle = document.getElementById('secondaryChartTitle');
+
+            if (monthId === "ALL") {
+                secondaryTitle.innerText = "📅 Monthly Cashflow (Income vs Expenses)";
+                const mDebits = [];
+                const mCredits = [];
+                const mNet = [];
+
+                allMonthsList.forEach(m => {
+                    let d = 0, c = 0;
+                    rawTransactions.forEach(t => {
+                        if (t.monthYear === m) {
+                            if (t.type === "Debit") d += t.amount;
+                            else if (t.type === "Credit") c += t.amount;
+                        }
+                    });
+                    mDebits.push(d);
+                    mCredits.push(c);
+                    mNet.push(c - d);
+                });
+
+                secondaryChart = new Chart(ctxSecondary, {
+                    type: 'bar',
+                    data: {
+                        labels: allMonthsList,
+                        datasets: [
+                            {
+                                label: 'Income / Credits (₹)',
+                                data: mCredits,
+                                backgroundColor: '#10b981',
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Expenses / Debits (₹)',
+                                data: mDebits,
+                                backgroundColor: '#ef4444',
+                                borderRadius: 4,
+                            },
+                            {
+                                type: 'line',
+                                label: 'Net Savings (₹)',
+                                data: mNet,
+                                borderColor: '#3b82f6',
+                                borderWidth: 2,
+                                tension: 0.2,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { ticks: { callback: v => '₹' + v.toLocaleString('en-IN') } }
+                        }
+                    }
+                });
+            } else {
+                secondaryTitle.innerText = "🔢 Transactions Count by Category";
+                const catCountSorted = allCatsInView.map(c => ({ name: c, count: catCountMap[c] || 0 }))
+                    .sort((a, b) => b.count - a.count).slice(0, 8);
+
+                secondaryChart = new Chart(ctxSecondary, {
+                    type: 'bar',
+                    data: {
+                        labels: catCountSorted.map(c => c.name),
+                        datasets: [{
+                            label: 'Count',
+                            data: catCountSorted.map(c => c.count),
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // 7. Render Category Breakdown Table
+            const catTableBody = document.getElementById('categoryTableBody');
+            catTableBody.innerHTML = '';
+            const catRows = allCatsInView.map(c => {
+                const d = catDebitMap[c] || 0;
+                const cr = catCreditMap[c] || 0;
+                const net = cr - d;
+                const pct = totalDebit > 0 ? (d / totalDebit * 100) : 0;
+                return { category: c, count: catCountMap[c] || 0, debit: d, credit: cr, net: net, pct: pct };
+            }).sort((a, b) => b.debit - a.debit);
+
+            catRows.forEach(r => {
+                const tr = document.createElement('tr');
+                const netColor = r.net >= 0 ? '#047857' : '#0f172a';
+                const netStr = (r.net >= 0 ? '₹' : '-₹') + Math.abs(r.net).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                tr.innerHTML = `
+                    <td><strong>${r.category}</strong></td>
+                    <td class="text-right">${r.count}</td>
+                    <td class="text-right" style="color: #b91c1c; font-weight: 600;">₹${r.debit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: ${Math.min(r.pct, 100)}%;"></div>
+                        </div>
+                        ${r.pct.toFixed(1)}%
+                    </td>
+                    <td class="text-right" style="color: #047857; font-weight: 600;">₹${r.credit.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="text-right" style="color: ${netColor};">${netStr}</td>
+                `;
+                catTableBody.appendChild(tr);
+            });
+
+            // 8. Render Recurring Payments
+            const recTableBody = document.getElementById('recurringTableBody');
+            recTableBody.innerHTML = '';
+            const recMap = {};
+            txs.filter(t => t.type === "Debit").forEach(t => {
+                const key = t.narration.toUpperCase().replace("UPI-", "").replace("REV-UPI-", "").split("@")[0].split("-")[0].trim().substring(0, 28);
+                if (!recMap[key]) recMap[key] = { count: 0, sum: 0 };
+                recMap[key].count += 1;
+                recMap[key].sum += t.amount;
+            });
+
+            const minRepeat = monthId === "ALL" ? 4 : 3;
+            const recurringVendors = Object.keys(recMap)
+                .filter(k => recMap[k].count >= minRepeat)
+                .map(k => ({ key: k, count: recMap[k].count, sum: recMap[k].sum }))
+                .sort((a, b) => b.sum - a.sum).slice(0, 8);
+
+            if (recurringVendors.length > 0) {
+                document.getElementById('recurringCard').style.display = 'block';
+                recurringVendors.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${r.key}</strong></td>
+                        <td class="text-right"><span class="badge badge-category">${r.count} times</span></td>
+                        <td class="text-right" style="color: #b91c1c; font-weight: 600;">₹${r.sum.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    `;
+                    recTableBody.appendChild(tr);
+                });
+            } else {
+                document.getElementById('recurringCard').style.display = 'none';
+            }
+
+            // 9. Apply table filter
+            applyFilters();
+        }
+
+        // Search & Filter Transactions Table
+        function renderTransactionsTable(txList) {
+            const tbody = document.getElementById('txTableBody');
+            tbody.innerHTML = '';
+            document.getElementById('txCount').innerText = txList.length;
+
+            if (txList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No matching transactions found for this search or filter.</td></tr>';
+                return;
+            }
+
+            txList.forEach(tx => {
+                const tr = document.createElement('tr');
+                const badgeType = tx.type === 'Debit' ? 'badge-debit' : 'badge-credit';
+                const amtColor = tx.type === 'Debit' ? '#b91c1c' : '#047857';
+                tr.innerHTML = `
+                    <td>${tx.date}</td>
+                    <td>${tx.narration}</td>
+                    <td><span class="badge badge-category">${tx.category}</span></td>
+                    <td><span class="badge ${badgeType}">${tx.type}</span></td>
+                    <td class="text-right" style="color: ${amtColor}; font-weight: 600;">₹${tx.amount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="text-right">₹${tx.closing.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cat = document.getElementById('categoryFilter').value;
+            const type = document.getElementById('typeFilter').value;
+
+            const baseTxs = getMonthTransactions(currentSelectedMonth);
+            const filtered = baseTxs.filter(tx => {
+                const matchSearch = !search || tx.narration.toLowerCase().includes(search) || tx.date.includes(search) || tx.category.toLowerCase().includes(search) || tx.amount.toString().includes(search);
+                const matchCat = !cat || tx.category === cat;
+                const matchType = !type || tx.type === type;
+                return matchSearch && matchCat && matchType;
+            });
+
+            renderTransactionsTable(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+
+        // Initial Load (All Months)
+        updateDashboard("ALL");
+    </script>
+</body>
+</html>

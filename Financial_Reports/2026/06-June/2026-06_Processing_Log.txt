@@ -1,0 +1,231 @@
+HDFC BANK STATEMENT PROCESSING LOG - Jun-2026
+======================================================================
+Transactions processed: 153
+Transport transactions categorized: 30
+Uncategorized transactions (> ₹500 - Needs Classification): 10
+
+Category totals (count and amount breakdown):
+Category                       Count  Debit Amount (₹)  Credit Amount (₹)      Net (₹)
+-----------------------------  -----  ----------------  -----------------  -----------
+Copilot AI                         1          2,000.00               0.00    -2,000.00
+Entertainment / Subscriptions      1            999.00               0.00      -999.00
+Food & Snacks                     36          8,152.93               0.00    -8,152.93
+General UPI / Shopping             1            234.82               0.00      -234.82
+Groceries                          6          1,247.00               0.00    -1,247.00
+Health / Medical                   2          1,045.00               0.00    -1,045.00
+House Maintenance                  1          3,000.00               0.00    -3,000.00
+Investments                        2        100,000.00               0.00  -100,000.00
+Petrol / Fuel                      3          3,500.00               0.00    -3,500.00
+Rent                               1         15,000.00               0.00   -15,000.00
+Salary / Income                    1              0.00         315,915.00   315,915.00
+Tax Refund / Tax Payment           1         15,150.00               0.00   -15,150.00
+Tea and Snacks                     8            425.00               0.00      -425.00
+Transport                         30          3,605.00               0.00    -3,605.00
+Uncategorized                     58        172,086.98           3,000.00  -169,086.98
+Utilities / Recharge               1          4,004.00               0.00    -4,004.00
+TOTAL                            153        330,449.73         318,915.00   -11,534.73
+
+Uncategorized transactions (> ₹500 - Needs Classification):
+Date        Narration                                                                                  Type    Amount (₹)  Category     
+----------  -----------------------------------------------------------------------------------------  ------  ----------  -------------
+12-06-2026  UPI-XXXXXA206-ICIC0000106-616384387109-U PISENDMONEY                                       Debit     3,000.00  Uncategorized
+12-06-2026  REV-UPI-50100298171990-9738413371@HDFC-6 16384387109-UPISENDMONEY                          Credit    3,000.00  Uncategorized
+12-06-2026  UPI-BFQ-IBKPOS.EP094154@ICICI-ICIC000000 4-251744134186-PAYMENTFROMPHONE                   Debit     7,495.00  Uncategorized
+14-06-2026  IBBILLPAYDR-HDFCWI-552260XXXXXX4258                                                        Debit    13,272.73  Uncategorized
+23-06-2026  UPI-UTKARSHSMALL FINANC-DIGITALFD@UTKAR SHBANK-UTKS0000001-720074628023-PAYMENT FROMPHONE  Debit    10,000.00  Uncategorized
+24-06-2026  UPI-MADANA R-HAVOCMADHAN39-2@OKSBI-HDFC0 003637-205804447749-PAYMENTFROMPHONE              Debit       590.00  Uncategorized
+26-06-2026  UPI-A MANJUNATHA-9844229961@YBL-SBIN004 0738-421164921136-PAYMENTFROMPHONE                 Debit       950.00  Uncategorized
+28-06-2026  UPI-XXXXXXXXXX4601-PKGB0010640-848970606 126-PAYMENTFROMPHONE                              Debit    36,000.00  Uncategorized
+30-06-2026  UPI-HARISHSHEKHARAPPAC-9964738987@YBL- CNRB0000000-743451000828-PAYMENTFROMPH ONE          Debit     2,500.00  Uncategorized
+30-06-2026  UPI-XXXXXXX1296-SBIN0000909-831353747830 -PAYMENTFROMPHONE                                 Debit    95,000.00  Uncategorized
+
+Transport transactions:
+Date        Narration                                                                                                      Type   Amount (₹)  Category 
+----------  -------------------------------------------------------------------------------------------------------------  -----  ----------  ---------
+01-06-2026  UPI-AMIYAKUMAR SAHOO-7894183203@YBL-SBI N0013581-458873424721-PAYMENTFROMPHONE                                 Debit       83.00  Transport
+01-06-2026  UPI-BAGMANE-BAGMANE.63010747@HDFCBANK-HD FC0MERUPI-292180661829-PAYMENTFROM PHON E                             Debit      708.00  Transport
+02-06-2026  UPI-PARBOBK-Q306098018@YBL-YESB0YBLUPI -761074989407-PAYMENTFROMPHONE                                          Debit       60.00  Transport
+03-06-2026  UPI-SUSHILKUMAR PAUL-SUSHILPAUL402-5@OK SBI-AIRP0000001-855815796293-PAYMENTFRO MPHONE                         Debit       74.00  Transport
+06-06-2026  UPI-SSHIVAKUMAR-SHIVA12313@YBL-ICIC0007 432-442212472037-PAYMENTFROMPHONE                                      Debit       48.00  Transport
+08-06-2026  UPI-DEEPAKKUMAR DAN-DANDEEPAK1@AXL-PUNB 0463800-670191745267-PAYMENTFROMPHONE                                  Debit       83.00  Transport
+08-06-2026  UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-1 79544287239-PAYMENTFROMPHONE  Debit       40.00  Transport
+08-06-2026  UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-3 01673172651-PAYMENTFROMPHONE  Debit       40.00  Transport
+09-06-2026  UPI-VINODKUMAR-9066378946-2@IBL-UTIB000 2067-935022309728-PAYMENTFROMPHONE                                     Debit       40.00  Transport
+09-06-2026  UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-028767612 964-PAYMENTFROMPHONE           Debit      550.00  Transport
+10-06-2026  UPI-AMIYAKUMARSAHOO-7894183203@IBL-SBI N0013581-028635392202-PAYMENTFROMPHONE                                  Debit       82.00  Transport
+12-06-2026  UPI-SAYAN DAS-6361805518@PTHDFC-BARB0VJW HIT-607185746030-PAYMENTFROMPHONE                                     Debit       73.00  Transport
+13-06-2026  UPI-KVISWANATHREDDY-9652029705-3@YBL-K VBL0004923-856210613048-PAYMENTFROMPHO NE                               Debit       60.00  Transport
+15-06-2026  UPI-SUSHILKUMAR PAUL-SUSHILPAUL402-5@OK SBI-AIRP0000001-717959337789-PAYMENTFRO MPHONE                         Debit       81.00  Transport
+16-06-2026  UPI-MRMADUSUDANA T-8106323536@AXL-IDIB0 00P055-119306534416-PAYMENTFROMPHONE                                   Debit       82.00  Transport
+17-06-2026  UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-122186473 728-PAYMENTFROMPHONE           Debit      550.00  Transport
+18-06-2026  UPI-AMIYAKUMARSAHOO-7894183203@IBL-SBI N0013581-106456351512-PAYMENTFROMPHONE                                  Debit       75.00  Transport
+21-06-2026  UPI-MRSRUKMINI R-PAYTMQR58KXXS@PAYTM-YE SB0PTMUPI-427489977677-PAYMENTFROM PHON E                              Debit       45.00  Transport
+22-06-2026  UPI-GIRIDHARI SAHOO-6372612061@KOTAKBANK -KKBK0811000-979215895695-PAYMENTFROMP HONE                           Debit       83.00  Transport
+22-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-438081347935-PAYM ENTFROMPHONE                  Debit       40.00  Transport
+22-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-762525884356-PAYM ENTFROMPHONE                  Debit       40.00  Transport
+23-06-2026  UPI-ANILKUMARMAHAKUD-7975494286-2@IBL- BARB0WHITEF-399125344925-PAYMENTFROM PH ONE                             Debit       68.00  Transport
+23-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-515537067290-PAYM ENTFROMPHONE                  Debit       40.00  Transport
+23-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-045324242357-PAYM ENTFROMPHONE                  Debit       40.00  Transport
+24-06-2026  UPI-SUDHARSHANJ-8073797402-3@IBL-UBIN09 08673-010249330437-PAYMENTFROMPHONE                                    Debit       80.00  Transport
+25-06-2026  UPI-BHAGWANDAS-9669328039@IBL-PUNB005381 0-219482779530-PAYMENTFROMPHONE                                       Debit       70.00  Transport
+26-06-2026  UPI-SHOBHAS MEGALAGERI-Q252560288@YBL-Y ESB0YBLUPI-826359208102-PAYMENTFROMPHO NE                              Debit      120.00  Transport
+27-06-2026  UPI-SHANTARAJU PATTANAS-KVGB91911307412 7003@CNRB-PKGB0013191-525485329675-PAYME NTFROMPHONE                   Debit       50.00  Transport
+29-06-2026  UPI-RAVIMANJAPPA HAVERI-PAYTMQR5F8MWT@P TYS-YESB0PTMUPI-043480263065-PAYMENTFRO MPHONE                         Debit      100.00  Transport
+30-06-2026  UPI-XXXXXXX1296-SBIN0000909-812608544884 -PAYMENTFROMPHONE                                                     Debit      100.00  Transport
+
+All processed transactions:
+Date        Narration                                                                                                      Type    Amount (₹)  Category                     
+----------  -------------------------------------------------------------------------------------------------------------  ------  ----------  -----------------------------
+01-06-2026  UPI-AMIYAKUMAR SAHOO-7894183203@YBL-SBI N0013581-458873424721-PAYMENTFROMPHONE                                 Debit        83.00  Transport                    
+01-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-198742505667-HUNGERBOXORDER B                                   Debit        80.00  Food & Snacks                
+01-06-2026  UPI-BAGMANE-BAGMANE.63010747@HDFCBANK-HD FC0MERUPI-292180661829-PAYMENTFROM PHON E                             Debit       708.00  Transport                    
+02-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-872866555631-HUNGERBOXORDER P                                   Debit       120.00  Food & Snacks                
+02-06-2026  UPI-SUKHIDEVI-Q958240458@YBL-YESB0YBLUP I-416576447926-PAYMENTFROMPHONE                                        Debit        15.00  Uncategorized                
+02-06-2026  UPI-MRSASHWINIA-BHARATPE.9Y0L0E0Q3B163 378@UNITYPE-UNBA000BHPE-689871000284-PAY TOBHARATPEME                   Debit        25.00  Uncategorized                
+02-06-2026  UPI-PARBOBK-Q306098018@YBL-YESB0YBLUPI -761074989407-PAYMENTFROMPHONE                                          Debit        60.00  Transport                    
+02-06-2026  UPI-AIRTEL RECHARGE-AIRTELPREDIRECT1@YBL -YESB0YBLUPI-234269426388-PAYMENTFROMP HONE                           Debit     4,004.00  Utilities / Recharge         
+02-06-2026  UPI-ARUNM S-ARUNSA966@OKSBI-KARB0000851 -065184173973-PAYMENTFROMPHONE                                         Debit        81.00  Uncategorized                
+03-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-859254696081-PAYMENTFROMPHONE                                     Debit        15.00  Tea and Snacks               
+03-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-636637498893-PAYMENTFROM PHONE                               Debit        56.00  Groceries                    
+03-06-2026  UPI-SUSHILKUMAR PAUL-SUSHILPAUL402-5@OK SBI-AIRP0000001-855815796293-PAYMENTFRO MPHONE                         Debit        74.00  Transport                    
+03-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-105352893808-HUNGERBOXORDER P                                   Debit       110.00  Food & Snacks                
+03-06-2026  UPI-SAFURA BI-PAYTM.S1SNQV8@PTY-YESB0MCH UPI-728225702631-PAYMENTFROMPHONE                                     Debit       100.00  Uncategorized                
+04-06-2026  UPI-PALAGIRI BALASUBBAR-Q035890289@YBL- YESB0YBLUPI-894005900706-PAYMENTFROMPH ONE                             Debit       177.00  Uncategorized                
+04-06-2026  UPI-SATHYASAIFILLINGS-PAYTM.D16484852 068@PTY-YESB0MCHUPI-806687102924-PAYMENT FROMPHONE                       Debit     1,000.00  Petrol / Fuel                
+04-06-2026  UPI-SRISAI PALACE-OMBK.AAHO1231574VVXLB WOV@MBK-PPIW0881822-711663783165-PAYMENT FROMPHONE                     Debit        25.00  Food & Snacks                
+05-06-2026  UPI-GEEKSFORGEEKS-GEEKSFORGEEKS217011.RZ P@RXAIRTEL-AIRP0000011-219516527408-PAYM ENTTOGEEKSFORG               Debit       999.00  Entertainment / Subscriptions
+05-06-2026  UPI-SRIUDUPIUPACHAR VE-PAYTMQR6F7MKI@P TYS-YESB0PTMUPI-837245833284-PAYMENTFRO MPHONE                          Debit       190.00  Food & Snacks                
+05-06-2026  UPI-ASHLI ASHOK-PAYTMQR6IO7C3@PTYS-YESB0 PTMUPI-169518060890-PAYMENTFROMPHONE                                  Debit        20.00  Uncategorized                
+05-06-2026  UPI-MSX3BIRIYANIZONE-IBKPOS.EP147769 @ICICI-ICIC0000004-558759898328-PAYMENT FROMPHONE                         Debit       429.00  Food & Snacks                
+05-06-2026  UPI-SATHYASAIFILLINGS-PAYTM.D16484852 068@PTY-YESB0MCHUPI-378918363822-PAYMENT FROMPHONE                       Debit     1,000.00  Petrol / Fuel                
+05-06-2026  UPI-MUDULI STORE-OMBK.AAGW077621QSUGSP3E U1@MBK-PPIW0881822-768805712657-PAYMENT FROMPHONE                     Debit        12.00  Food & Snacks                
+05-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-353470837571-PAYMENTFROM PHONE                               Debit       372.00  Groceries                    
+06-06-2026  UPI-SSHIVAKUMAR-SHIVA12313@YBL-ICIC0007 432-442212472037-PAYMENTFROMPHONE                                      Debit        48.00  Transport                    
+06-06-2026  UPI-MAYURV NAYAKA-JOJO99@YBL-CNRB000003 3-421943039436-PAYMENTFROMPHONE                                        Debit        51.00  Uncategorized                
+06-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-307675940412-PAYMENTFROM PHONE                               Debit        10.00  Groceries                    
+06-06-2026  UPI-BV SARASWATHI-PAYTM.S1PPJU6@PTY-YES B0MCHUPI-589473899248-PAYMENTFROM PHONE                                Debit        48.00  Uncategorized                
+06-06-2026  UPI-SANJAY KM-Q500988938@YBL-YESB0YB LUPI-239949634555-PAYMENTFROMPHONE                                        Debit        20.00  Uncategorized                
+06-06-2026  UPI-MUBARAK PASHA-SAMEERMUBARAK1111111@ AXL-SBIN0062221-472814026881-PAYMENTFRO MPHONE                         Debit        51.00  Uncategorized                
+06-06-2026  UPI-MRMANISH KUMAR-6201100830@AXL-MAHB0 002126-363830867635-PAYMENTFROMPHONE                                   Debit        80.00  Uncategorized                
+06-06-2026  UPI-HARIJANA VENU-Q284773710@YBL-YESB0Y BLUPI-276851165298-PAYMENTFROMPHONE                                    Debit         5.00  Uncategorized                
+07-06-2026  UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-800629169817-P AYMENTFROMPHONE                Debit        90.00  Food & Snacks                
+07-06-2026  UPI-NALABHIMAPAKAM KAMMA-PAYTMQR28100505 01011DVBY38YKIA5@PAYTM-YESB0PTMUPI-34312 9497336-PAYMENTFROMPHONE     Debit        75.00  Food & Snacks                
+08-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-756166717539-HUNGERBOXORDER P                                   Debit       120.00  Food & Snacks                
+08-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-778416117248-PAYMENTFROMPHONE                                     Debit        67.00  Tea and Snacks               
+08-06-2026  UPI-DEEPAKKUMAR DAN-DANDEEPAK1@AXL-PUNB 0463800-670191745267-PAYMENTFROMPHONE                                  Debit        83.00  Transport                    
+08-06-2026  UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-1 79544287239-PAYMENTFROMPHONE  Debit        40.00  Transport                    
+08-06-2026  UPI-SAROJA PERUMAL-PAYTM.S1RFO3M@PTY-YES B0MCHUPI-157810206218-PAYMENTFROM PHONE                               Debit        20.00  Uncategorized                
+08-06-2026  UPI-SARITA-PAYTMQR57ZMHY@PAYTM-YESB0PTMU PI-475440450539-PAYMENTFROMPHONE                                      Debit        30.00  Uncategorized                
+08-06-2026  UPI-SUKHIDEVI-Q958240458@YBL-YESB0YBLUP I-556979935443-PAYMENTFROMPHONE                                        Debit        10.00  Uncategorized                
+08-06-2026  UPI-BANGALOREMETRO RAIL-BANGALOREMETROR AILCORP-8579705.PAYU@INDUS-INDB0MERCHA-3 01673172651-PAYMENTFROMPHONE  Debit        40.00  Transport                    
+09-06-2026  UPI-VINODKUMAR-9066378946-2@IBL-UTIB000 2067-935022309728-PAYMENTFROMPHONE                                     Debit        40.00  Transport                    
+09-06-2026  UPI-ABADHUSSAIN TALUKD-AHTALUKDAR9577@ OKICICI-SBIN0007648-919913709749-PAYMENT FROMPHONE                      Debit        52.00  Uncategorized                
+09-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-016993950889-PAYMENTFROMPHONE                                     Debit        65.00  Tea and Snacks               
+09-06-2026  UPI-PRAKASHCHANDRA SAHO-9348076329@PTYE S-UCBA0000841-073068564947-PAYMENTFROM PHONE                           Debit        82.00  Uncategorized                
+09-06-2026  UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-028767612 964-PAYMENTFROMPHONE           Debit       550.00  Transport                    
+09-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-765692638281-HUNGERBOXORDER B                                   Debit        80.00  Food & Snacks                
+09-06-2026  UPI-RJENTERPRISES-Q626097626@YBL-YESB0 YBLUPI-309078983698-PAYMENTFROMPHONE                                    Debit       100.00  Uncategorized                
+10-06-2026  UPI-AMIYAKUMARSAHOO-7894183203@IBL-SBI N0013581-028635392202-PAYMENTFROMPHONE                                  Debit        82.00  Transport                    
+10-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-700610954367-HUNGERBOXORDER B                                   Debit        55.00  Food & Snacks                
+10-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-377497871852-HUNGERBOXORDER U                                   Debit        80.00  Food & Snacks                
+10-06-2026  UPI-RAKESHSAIN-PAYTMQR2810050501011B7AB Y6W86VD@PAYTM-YESB0PTMUPI-324528978118-P AYMENTFROMPHONE               Debit        20.00  Uncategorized                
+10-06-2026  UPI-SOMASHEKHAR-Q153524740@YBL-YESB0YBLU PI-013337054609-PAYMENTFROMPHONE                                      Debit        20.00  Food & Snacks                
+11-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-327855611117-PAYMENTFROMPHONE                                     Debit        36.00  Tea and Snacks               
+12-06-2026  UPI-SADHANA AK-7899664828-2@AXL-SBIN004 0117-482510895390-PAYMENTFROMPHONE                                     Debit    15,000.00  Rent                         
+12-06-2026  UPI-XXXXXA206-ICIC0000106-616384387109-U PISENDMONEY                                                           Debit     3,000.00  Uncategorized                
+12-06-2026  REV-UPI-50100298171990-9738413371@HDFC-6 16384387109-UPISENDMONEY                                              Credit    3,000.00  Uncategorized                
+12-06-2026  NEFTDR-ICIC0000106-VAASTUDEW FLOWER-NE TBANK, MUM-HDFCH01058464062-HDFC74D5E262 E0EE                           Debit     3,000.00  House Maintenance            
+12-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-558334721063-PAYMENTFROMPHONE                                     Debit        18.00  Tea and Snacks               
+12-06-2026  UPI-KANTISWEETS KANNAM-Q704439141@YBL- YESB0YBLUPI-982652800088-PAYMENTFROMPH ONE                              Debit     2,862.00  Food & Snacks                
+12-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-956619373386-PAYMENTFROMPHONE                                     Debit        52.00  Tea and Snacks               
+12-06-2026  UPI-MAIZMEXICAN KITCHEN-PAYTM.D16388949 661@PTY-YESB0MCHUPI-404271280000-PAYMENT FROMPHONE                     Debit       293.00  Food & Snacks                
+12-06-2026  UPI-YANAVIETHNICFOODS-YESPAY.BIZS.BIZ 203307.TER4@YESBANKLTD-YESB0YESUPI-90812 9241243-PAYMENTFROMPHONE        Debit        50.00  Food & Snacks                
+12-06-2026  UPI-BFQ-IBKPOS.EP094154@ICICI-ICIC000000 4-251744134186-PAYMENTFROMPHONE                                       Debit     7,495.00  Uncategorized                
+12-06-2026  UPI-GOMARAM KALAS-PAYTM.S2EQYY2@PTY-YESB 0MCHUPI-824039513750-PAYMENTFROMPHONE                                 Debit        30.00  Uncategorized                
+12-06-2026  UPI-SAYAN DAS-6361805518@PTHDFC-BARB0VJW HIT-607185746030-PAYMENTFROMPHONE                                     Debit        73.00  Transport                    
+13-06-2026  UPI-KVISWANATHREDDY-9652029705-3@YBL-K VBL0004923-856210613048-PAYMENTFROMPHO NE                               Debit        60.00  Transport                    
+13-06-2026  UPI-PHONEPE-SV2512112238344230219611@YBL -YESB0YBLUPI-716432581357-PAYMENTFROMP HONE                           Debit       360.00  Uncategorized                
+13-06-2026  UPI-BV SARASWATHI-PAYTM.S1PPJU6@PTY-YES B0MCHUPI-825044445658-PAYMENTFROM PHONE                                Debit        60.00  Uncategorized                
+13-06-2026  UPI-MRMURULIGR-7676889085@IBL-IDIB000 N036-482443402533-PAYMENTFROMPHONE                                       Debit       108.00  Uncategorized                
+13-06-2026  UPI-DEVAPPA-DAVAPPAAPPA38760@IBL-CNRB000 0033-472733273695-PAYMENTFROMPHONE                                    Debit        94.00  Uncategorized                
+13-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-209019415207-PAYMENTFROM PHONE                               Debit       210.00  Groceries                    
+14-06-2026  IBBILLPAYDR-HDFCWI-552260XXXXXX4258                                                                            Debit    13,272.73  Uncategorized                
+14-06-2026  UPI-SRISAIPALACE-OMBK.AAHO1311374VZD2G GGX@MBK-PPIW0881822-487559860542-PAYMENT FROMPHONE                      Debit     1,450.00  Food & Snacks                
+14-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-302434264835-PAYMENTFROM PHONE                               Debit        81.00  Groceries                    
+14-06-2026  UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-495328700229-P AYMENTFROMPHONE                Debit       310.00  Food & Snacks                
+15-06-2026  UPI-SUSHILKUMAR PAUL-SUSHILPAUL402-5@OK SBI-AIRP0000001-717959337789-PAYMENTFRO MPHONE                         Debit        81.00  Transport                    
+15-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-311089453685-HUNGERBOXORDER U                                   Debit        80.00  Food & Snacks                
+15-06-2026  UPI-AUTOPAY-GOOGLE PLAY-PLAYSTORE@AXISBA NK-UTIB0000553-172715721666-MANDATEEXECU TE                           Debit     2,000.00  Copilot AI                   
+16-06-2026  UPI-MRMADUSUDANA T-8106323536@AXL-IDIB0 00P055-119306534416-PAYMENTFROMPHONE                                   Debit        82.00  Transport                    
+16-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-025946273167-HUNGERBOXORDER P                                   Debit       120.00  Food & Snacks                
+16-06-2026  UPI-SAROJA PERUMAL-PAYTM.S1RFO3M@PTY-YES B0MCHUPI-262811571530-PAYMENTFROM PHONE                               Debit        10.00  Uncategorized                
+17-06-2026  UPI-LOKESH S-6366329493@PTSBI-SBIN00150 34-894606466663-PAYMENTFROMPHONE                                       Debit       127.00  Uncategorized                
+17-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-315500175465-HUNGERBOXORDER P                                   Debit       120.00  Food & Snacks                
+17-06-2026  UPI-RBLBANKLIMITED-NCMC.6401PMTS000275 638@CASHFREENSDLPB-NSPB0000011-122186473 728-PAYMENTFROMPHONE           Debit       550.00  Transport                    
+17-06-2026  UPI-MRSASHWINIA-BHARATPE.9Y0L0E0Q3B163 378@UNITYPE-UNBA000BHPE-822772074837-PAY TOBHARATPEME                   Debit        25.00  Uncategorized                
+18-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-712052878052-HUNGERBOXORDER U                                   Debit        80.00  Food & Snacks                
+18-06-2026  UPI-SOMASHEKHAR-Q153524740@YBL-YESB0YBLU PI-088176587919-PAYMENTFROMPHONE                                      Debit        45.00  Food & Snacks                
+18-06-2026  UPI-AMIYAKUMARSAHOO-7894183203@IBL-SBI N0013581-106456351512-PAYMENTFROMPHONE                                  Debit        75.00  Transport                    
+18-06-2026  UPI-PALAGIRI BALASUBBAR-Q035890289@YBL- YESB0YBLUPI-624560357935-PAYMENTFROMPH ONE                             Debit       114.00  Uncategorized                
+18-06-2026  UPI-SAROJA PERUMAL-PAYTM.S1RFO3M@PTY-YES B0MCHUPI-300367029546-PAYMENTFROM PHONE                               Debit        10.00  Uncategorized                
+19-06-2026  UPI-SOMASHEKHARSONOF G-SOMUGNSOMU53819 @AXL-UBIN0917486-307463891751-PAYMENTFR OMPHONE                         Debit        68.00  Food & Snacks                
+19-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-301730017950-HUNGERBOXORDER U                                   Debit        45.00  Food & Snacks                
+19-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-205512812510-HUNGERBOXORDER P                                   Debit       115.00  Food & Snacks                
+19-06-2026  UPI-ASHLI ASHOK-PAYTMQR6WCCYM@PTYS-YESB0 PTMUPI-570301582594-PAYMENTFROMPHONE                                  Debit       170.00  Uncategorized                
+20-06-2026  UPI-FAMILYKITCHENICECR-VYAPAR.17575327 8670@HDFCBANK-HDFC0MERUPI-022643400047-P AYMENTFROMPHONE                Debit        95.00  Food & Snacks                
+20-06-2026  UPI-SRISAI PALACE-OMBK.AAHO1231574VVXLB WOV@MBK-PPIW0881822-377643499189-PAYMENT FROMPHONE                     Debit       105.00  Food & Snacks                
+20-06-2026  UPI-BIRIYANIZESTKADUGO-Q937748863@YBL- YESB0YBLUPI-358538144600-PAYMENT                                        Debit       247.00  Food & Snacks                
+21-06-2026  UPI-MRSRUKMINI R-PAYTMQR58KXXS@PAYTM-YE SB0PTMUPI-427489977677-PAYMENTFROM PHON E                              Debit        45.00  Transport                    
+21-06-2026  UPI-SANNARANGEGOWDA T-Q273289229@YBL-YES B0YBLUPI-427142457079-PAYMENTFROM PHONE                               Debit       518.00  Groceries                    
+22-06-2026  UPI-GIRIDHARI SAHOO-6372612061@KOTAKBANK -KKBK0811000-979215895695-PAYMENTFROMP HONE                           Debit        83.00  Transport                    
+22-06-2026  UPI-MRSASHWINIA-BHARATPE.9Y0L0E0Q3B163 378@UNITYPE-UNBA000BHPE-992163586729-PAY TOBHARATPEME                   Debit        25.00  Uncategorized                
+22-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-438081347935-PAYM ENTFROMPHONE                  Debit        40.00  Transport                    
+22-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-762525884356-PAYM ENTFROMPHONE                  Debit        40.00  Transport                    
+22-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-767451069082-HUNGERBOXORDER B                                   Debit        80.00  Food & Snacks                
+23-06-2026  UPI-ANILKUMARMAHAKUD-7975494286-2@IBL- BARB0WHITEF-399125344925-PAYMENTFROM PH ONE                             Debit        68.00  Transport                    
+23-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-515537067290-PAYM ENTFROMPHONE                  Debit        40.00  Transport                    
+23-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-651736959787-HUNGERBOXORDER B                                   Debit        50.00  Food & Snacks                
+23-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-446648935309-HUNGERBOXORDER U                                   Debit        80.00  Food & Snacks                
+23-06-2026  UPI-BANGALOREMETRO RAIL-ENGLISHBMRC.PAY U@AXISBANK-UTIB0003156-045324242357-PAYM ENTFROMPHONE                  Debit        40.00  Transport                    
+23-06-2026  UPI-UTKARSHSMALL FINANC-DIGITALFD@UTKAR SHBANK-UTKS0000001-720074628023-PAYMENT FROMPHONE                      Debit    10,000.00  Uncategorized                
+23-06-2026  UPI-GOMARAM KALAS-PAYTM.S2EQYY2@PTY-YESB 0MCHUPI-441597081142-PAYMENTFROMPHONE                                 Debit        30.00  Uncategorized                
+24-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-396422746917-HUNGERBOXORDER P                                   Debit        75.00  Food & Snacks                
+24-06-2026  UPI-SUDHARSHANJ-8073797402-3@IBL-UBIN09 08673-010249330437-PAYMENTFROMPHONE                                    Debit        80.00  Transport                    
+24-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-606029304823-PAYMENTFROMPHONE                                     Debit       136.00  Tea and Snacks               
+24-06-2026  UPI-ZOMATO-ZOMATO.ETERNALTSP.PAYU@HDFCBA NK-HDFC0MERUPI-045632185760-UPIINTENT                                 Debit       216.93  Food & Snacks                
+24-06-2026  UPI-MADANA R-HAVOCMADHAN39-2@OKSBI-HDFC0 003637-205804447749-PAYMENTFROMPHONE                                  Debit       590.00  Uncategorized                
+24-06-2026  UPI-HUNGERBOX-PAYTM-8774066@PTYBL-YESB0P TMUPI-823426525829-HUNGERBOXORDER U                                   Debit        80.00  Food & Snacks                
+25-06-2026  UPI-BHAGWANDAS-9669328039@IBL-PUNB005381 0-219482779530-PAYMENTFROMPHONE                                       Debit        70.00  Transport                    
+25-06-2026  UPI-ALTAF ANGADI-7892589579@IBL-CNRB000 0033-096897052249-PAYMENTFROMPHONE                                     Debit        20.00  Uncategorized                
+25-06-2026  UPI-BALARAJAA-9663619066@YBL-CNRB000003 3-595300767431-PAYMENTFROMPHONE                                        Debit       107.00  Uncategorized                
+25-06-2026  UPI-MRRATNESH KUMAR-9315453066-2@IBL-C BIN0282876-563000457523-PAYMENTFROMPHO NE                               Debit        10.00  Uncategorized                
+25-06-2026  UPI-K NARASIMHAMURTHY-8431407205-2@AXL- SBIN0040162-127237933494-PAYMENTFROMPH ONE                             Debit        60.00  Uncategorized                
+25-06-2026  UPI-MRSRINIVAS M-Q947708676@YBL-YESB0Y BLUPI-560037605804-PAYMENTFROMPHONE                                     Debit        36.00  Tea and Snacks               
+25-06-2026  UPI-KARIBASAVANP-7259253462@IBL-CNRB00 00033-766272536298-PAYMENTFROMPHONE                                     Debit        30.00  Uncategorized                
+25-06-2026  UPI-HEMALATHA-917483823108@KBL-KARB00003 41-840689640040-PAYMENTFROMPHONE                                      Debit        60.00  Uncategorized                
+25-06-2026  UPI-IRAPPABASAVANTAPPA-6360971251@YBL- IPOS0000001-308562877705-PAYMENTFROMPH ONE                              Debit        10.00  Uncategorized                
+25-06-2026  UPI-SRIRAM PETROLEUM-PAYTM.S1BIKNX@PTY- YESB0MCHUPI-205907122747-PAYMENTFROM PH ONE                            Debit     1,500.00  Petrol / Fuel                
+25-06-2026  UPI-ERAPPABHARIJAN-6360971251-2@AXL-IO BA0002889-161085203888-PAYMENTFROMPHON E                                Debit        20.00  Uncategorized                
+25-06-2026  UPI-RELIANCERETAILLIMI-JIOFIBER-PAYTM@ PTYBL-YESB0PTMUPI-216629687242-PAYMENTF ROMPHONE                        Debit       234.82  General UPI / Shopping       
+26-06-2026  UPI-A MANJUNATHA-9844229961@YBL-SBIN004 0738-421164921136-PAYMENTFROMPHONE                                     Debit       950.00  Uncategorized                
+26-06-2026  UPI-SALMANI HOSPITAL-WL0500392A0020694@U NIONBANK-UBIN0900397-388096853942-PAYMEN TFROMPHONE                   Debit       200.00  Health / Medical             
+26-06-2026  UPI-SHOBHAS MEGALAGERI-Q252560288@YBL-Y ESB0YBLUPI-826359208102-PAYMENTFROMPHO NE                              Debit       120.00  Transport                    
+26-06-2026  UPI-SHOBHAS MEGALAGERI-Q252560288@YBL-Y ESB0YBLUPI-491258915813-PAYMENTFROMPHO NE                              Debit       240.00  Uncategorized                
+26-06-2026  UPI-CHAITRARKOKKANNANAVA-Q524689439@YBL- YESB0YBLUPI-257510136023-PAYMENTFROMPH ONE                            Debit         5.00  Uncategorized                
+27-06-2026  UPI-SHANTARAJU PATTANAS-KVGB91911307412 7003@CNRB-PKGB0013191-525485329675-PAYME NTFROMPHONE                   Debit        50.00  Transport                    
+27-06-2026  UPI-MR MANJUNATHN BALE-Q702018260@YBL- YESB0YBLUPI-133342908695-PAYMENTFROMPH ONE                              Debit        60.00  Uncategorized                
+28-06-2026  UPI-SAVITADEVI GOPALARAM-PAYTM.S1NPCRE@P TY-YESB0MCHUPI-495474826125-PAYMENT FROM PHONE                        Debit       225.00  Uncategorized                
+28-06-2026  UPI-INDIANRAILWAY CATER-INDIANRAILWAYCA 252644.RZP@RXAXIS-UTIB0000RZP-6179086224 34-UPIPAYMENT                 Debit       182.25  Uncategorized                
+28-06-2026  UPI-XXXXXXXXXX4601-PKGB0010640-848970606 126-PAYMENTFROMPHONE                                                  Debit    36,000.00  Uncategorized                
+28-06-2026  UPI-GROWWINVESTTECH PR-GROWW.BRK@VALID ICICI-ICIC0DC0099-654580844886-PAIDVIA ELEMENTS                         Debit    50,000.00  Investments                  
+28-06-2026  UPI-GROWWINVESTTECH PV-GROWW.BRK@VALID HDFC-HDFC0MERUPI-654580824885-PAIDVIAE LEMENTS                          Debit    50,000.00  Investments                  
+29-06-2026  UPI-RAVIMANJAPPA HAVERI-PAYTMQR5F8MWT@P TYS-YESB0PTMUPI-043480263065-PAYMENTFRO MPHONE                         Debit       100.00  Transport                    
+29-06-2026  UPI-RAVIMANJAPPA HAVERI-PAYTMQR5F8MWT@P TYS-YESB0PTMUPI-220247120808-PAYMENTFRO MPHONE                         Debit         5.00  Uncategorized                
+29-06-2026  UPI-PARVATI TUPPAD-Q909025135@YBL-YESB0Y BLUPI-855751474240-PAYMENTFROMPHONE                                   Debit        50.00  Uncategorized                
+29-06-2026  UPI-LAXMI RATTIHALLIMATH-PAYTM.S1MDQX5@P TY-YESB0MCHUPI-237166453510-PAYMENT FROM PHONE                        Debit        45.00  Uncategorized                
+30-06-2026  NEFTCR-DEUT0797BGL-IBMINDIAPRIVATELI MITED-SHREYASSBAGI-DEUTH026181A0VP1SA LARYJUN                             Credit  315,915.00  Salary / Income              
+30-06-2026  UPI-DTAX-DIRECTTAX@ICICI-ICIC0DC0099-766 004121747-CRN26063000038048                                           Debit    15,150.00  Tax Refund / Tax Payment     
+30-06-2026  UPI-HARISHSHEKHARAPPAC-9964738987@YBL- CNRB0000000-743451000828-PAYMENTFROMPH ONE                              Debit     2,500.00  Uncategorized                
+30-06-2026  UPI-MAHAVEER MEDICALS-PAYTMQR28100505010 1UDCMPYOKQXFQ@PAYTM-YESB0PTMUPI-94103530 2647-PAYMENTFROMPHONE        Debit       845.00  Health / Medical             
+30-06-2026  UPI-XXXXXXX1296-SBIN0000909-812608544884 -PAYMENTFROMPHONE                                                     Debit       100.00  Transport                    
+30-06-2026  UPI-XXXXXXX1296-SBIN0000909-831353747830 -PAYMENTFROMPHONE                                                     Debit    95,000.00  Uncategorized                

@@ -1,0 +1,19 @@
+HDFC Bank Statement - Category-wise Financial Summary
+=======================================================
+Category	Debit Total (Rs.)	Credit Total (Rs.)	Net Change (Rs.)
+Credit Bill Payment	21575.0	0.0	-21575.0
+Donations / Religious	11003.0	0.0	-11003.0
+Entertainment / Subscriptions	2000.0	0.0	-2000.0
+Food & Snacks	4345.96	0.0	-4345.96
+Groceries	522.0	0.0	-522.0
+House Maintenance	3000.0	0.0	-3000.0
+Investments	1000.0	0.0	-1000.0
+Petrol / Fuel	2350.0	0.0	-2350.0
+Rent	15000.0	0.0	-15000.0
+Salary / Income	0.0	189237.0	189237.0
+Self / Family Transfer	172000.0	0.0	-172000.0
+Swimming	6001.0	0.0	-6001.0
+Tea and Snacks	12.0	0.0	-12.0
+Transport	2307.0	0.0	-2307.0
+Uncategorized	9912.0	119170.0	109258.0
+Total	251027.96	308407.0	57379.04

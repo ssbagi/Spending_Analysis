@@ -1,0 +1,20 @@
+HDFC Bank Statement - Category-wise Financial Summary
+=======================================================
+Category	Debit Total (Rs.)	Credit Total (Rs.)	Net Change (Rs.)
+Copilot AI	2000.0	0.0	-2000.0
+Entertainment / Subscriptions	999.0	0.0	-999.0
+Food & Snacks	8152.93	0.0	-8152.93
+General UPI / Shopping	234.82	0.0	-234.82
+Groceries	1247.0	0.0	-1247.0
+Health / Medical	1045.0	0.0	-1045.0
+House Maintenance	3000.0	0.0	-3000.0
+Investments	100000.0	0.0	-100000.0
+Petrol / Fuel	3500.0	0.0	-3500.0
+Rent	15000.0	0.0	-15000.0
+Salary / Income	0.0	315915.0	315915.0
+Tax Refund / Tax Payment	15150.0	0.0	-15150.0
+Tea and Snacks	425.0	0.0	-425.0
+Transport	3605.0	0.0	-3605.0
+Uncategorized	172086.98	3000.0	-169086.98
+Utilities / Recharge	4004.0	0.0	-4004.0
+Total	330449.73	318915.0	-11534.73
