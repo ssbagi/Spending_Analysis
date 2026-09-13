@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -17,6 +18,15 @@ class Transaction:
     amount: Decimal
 
 
+@dataclass(frozen=True)
+class SpendingSummary:
+    transaction_count: int
+    total_income: Decimal
+    total_spending: Decimal
+    net_total: Decimal
+    spending_by_category: dict[str, Decimal]
+
+
 def load_transactions(handle: TextIO) -> list[Transaction]:
     reader = csv.DictReader(handle)
     required_fields = {"date", "description", "category", "amount"}
@@ -25,7 +35,8 @@ def load_transactions(handle: TextIO) -> list[Transaction]:
         raise ValueError("Transaction data must include a header row.")
 
     normalized_fieldnames = [(field or "").strip().lower() for field in reader.fieldnames]
-    duplicate_fields = sorted({field for field in normalized_fieldnames if field and normalized_fieldnames.count(field) > 1})
+    header_counts = Counter(field for field in normalized_fieldnames if field)
+    duplicate_fields = sorted(field for field, count in header_counts.items() if count > 1)
     if duplicate_fields:
         duplicates = ", ".join(duplicate_fields)
         raise ValueError(f"Transaction data has duplicate fields after normalization: {duplicates}.")
@@ -65,7 +76,7 @@ def load_transactions(handle: TextIO) -> list[Transaction]:
     return normalized_rows
 
 
-def summarize_transactions(transactions: Iterable[Transaction]) -> dict[str, object]:
+def summarize_transactions(transactions: Iterable[Transaction]) -> SpendingSummary:
     total_income = Decimal("0")
     total_spending = Decimal("0")
     spending_by_category: dict[str, Decimal] = {}
@@ -80,28 +91,27 @@ def summarize_transactions(transactions: Iterable[Transaction]) -> dict[str, obj
             total_spending += spending_amount
             spending_by_category[transaction.category] = spending_by_category.get(transaction.category, Decimal("0")) + spending_amount
 
-    return {
-        "transaction_count": transaction_count,
-        "total_income": total_income,
-        "total_spending": total_spending,
-        "net_total": total_income - total_spending,
-        "spending_by_category": dict(sorted(spending_by_category.items(), key=lambda item: (-item[1], item[0]))),
-    }
+    return SpendingSummary(
+        transaction_count=transaction_count,
+        total_income=total_income,
+        total_spending=total_spending,
+        net_total=total_income - total_spending,
+        spending_by_category=dict(sorted(spending_by_category.items(), key=lambda item: (-item[1], item[0]))),
+    )
 
 
-def format_report(summary: dict[str, object]) -> str:
-    spending_by_category: dict[str, Decimal] = summary["spending_by_category"]  # type: ignore[assignment]
+def format_report(summary: SpendingSummary) -> str:
     lines = [
         "Personal Transactions Summary",
-        f"Transactions: {summary['transaction_count']}",
-        f"Total income: ${summary['total_income']:.2f}",
-        f"Total spending: ${summary['total_spending']:.2f}",
-        f"Net total: ${summary['net_total']:.2f}",
+        f"Transactions: {summary.transaction_count}",
+        f"Total income: ${summary.total_income:.2f}",
+        f"Total spending: ${summary.total_spending:.2f}",
+        f"Net total: ${summary.net_total:.2f}",
         "Spending by category:",
     ]
 
-    if spending_by_category:
-        lines.extend(f"- {category}: ${amount:.2f}" for category, amount in spending_by_category.items())
+    if summary.spending_by_category:
+        lines.extend(f"- {category}: ${amount:.2f}" for category, amount in summary.spending_by_category.items())
     else:
         lines.append("- No spending transactions")
 

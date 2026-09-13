@@ -7,7 +7,7 @@ from decimal import Decimal
 from io import StringIO
 from pathlib import Path
 
-from spending_analysis import Transaction, format_report, load_transactions, summarize_transactions
+from spending_analysis import SpendingSummary, Transaction, format_report, load_transactions, summarize_transactions
 
 
 class LoadTransactionsTests(unittest.TestCase):
@@ -68,24 +68,24 @@ class SpendingSummaryTests(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(summary["transaction_count"], 4)
-        self.assertEqual(summary["total_income"], Decimal("5.00"))
-        self.assertEqual(summary["total_spending"], Decimal("45.00"))
-        self.assertEqual(summary["net_total"], Decimal("-40.00"))
+        self.assertEqual(summary.transaction_count, 4)
+        self.assertEqual(summary.total_income, Decimal("5.00"))
+        self.assertEqual(summary.total_spending, Decimal("45.00"))
+        self.assertEqual(summary.net_total, Decimal("-40.00"))
         self.assertEqual(
-            summary["spending_by_category"],
+            summary.spending_by_category,
             {"Food": Decimal("35.00"), "Transport": Decimal("10.00")},
         )
 
     def test_format_report_handles_no_spending(self):
         report = format_report(
-            {
-                "transaction_count": 1,
-                "total_income": Decimal("25.00"),
-                "total_spending": Decimal("0.00"),
-                "net_total": Decimal("25.00"),
-                "spending_by_category": {},
-            }
+            SpendingSummary(
+                transaction_count=1,
+                total_income=Decimal("25.00"),
+                total_spending=Decimal("0.00"),
+                net_total=Decimal("25.00"),
+                spending_by_category={},
+            )
         )
 
         self.assertIn("- No spending transactions", report)
