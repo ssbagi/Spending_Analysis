@@ -64,11 +64,12 @@ class SpendingSummaryTests(unittest.TestCase):
                 Transaction("2026-09-01", "Groceries", "Food", Decimal("-25.25")),
                 Transaction("2026-09-02", "Bus pass", "Transport", Decimal("-10.00")),
                 Transaction("2026-09-03", "Refund", "Food", Decimal("5.00")),
+                Transaction("2026-09-03", "Balance check", "Admin", Decimal("0.00")),
                 Transaction("2026-09-04", "Dinner", "Food", Decimal("-9.75")),
             ]
         )
 
-        self.assertEqual(summary.transaction_count, 4)
+        self.assertEqual(summary.transaction_count, 5)
         self.assertEqual(summary.total_income, Decimal("5.00"))
         self.assertEqual(summary.total_spending, Decimal("45.00"))
         self.assertEqual(summary.net_total, Decimal("-40.00"))

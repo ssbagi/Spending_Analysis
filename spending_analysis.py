@@ -84,9 +84,9 @@ def summarize_transactions(transactions: Iterable[Transaction]) -> SpendingSumma
 
     for transaction in transactions:
         transaction_count += 1
-        if transaction.amount >= 0:
+        if transaction.amount > 0:
             total_income += transaction.amount
-        else:
+        elif transaction.amount < 0:
             spending_amount = -transaction.amount
             total_spending += spending_amount
             spending_by_category[transaction.category] = spending_by_category.get(transaction.category, Decimal("0")) + spending_amount
@@ -120,14 +120,15 @@ def format_report(summary: SpendingSummary) -> str:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analyze personal transaction history from a CSV file.")
-    parser.add_argument("csv_file", type=Path, help="Path to a CSV file with date, description, category, and amount columns")
+    parser.add_argument("csv_file", help="Path to a CSV file with date, description, category, and amount columns")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    csv_file = Path(args.csv_file)
     try:
-        with args.csv_file.open(newline="", encoding="utf-8") as handle:
+        with csv_file.open(newline="", encoding="utf-8") as handle:
             transactions = load_transactions(handle)
     except (OSError, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
