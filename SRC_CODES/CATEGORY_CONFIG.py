@@ -31,8 +31,11 @@ DEFAULT_CATEGORY_RULES = [
     ]),
     ("Self / Family Transfer", [
         "SHREYAS S BAGI", "SHREYASSBAGI", "SHANTESH B BAGI", "SHANTESHBBAGI",
-        "SHANTESH BAGI", "SHANTESH", "SAVITHA SHANTESH", "SAVITHA", "SAHANA SHANTESH",
+        "SHANTESH BAGI", "SHANTESH", "SAVITHA SHANTESH", "SAVITHA", "10811461296", "SAHANA SHANTESH", "9448487633",
         "SAHANA", "NAGARATHNAV MUNDASA", "NAGARATHNAV", "MUNDASA",
+    ]),
+    ("Friends", [
+        "SOUMYATAPASHETTI", "PATTED",
     ]),
     ("Parents / Grandparents / Siblings Spending", [
         "LAKSHMIPATHIG", "UPI-LAKSHMIPATHIG",
@@ -42,14 +45,14 @@ DEFAULT_CATEGORY_RULES = [
     ]),
     ("Investments", [
         "GROWW", "GROWW INVEST", "GROWW.BRK", "UTKARSH SMALL FINANC", "MUTUAL FUND",
-        "ICCLMF", "ICCL", "MF COLLECT",
+        "ICCLMF", "ICCL", "MF COLLECT", "SAFEGOLD", "APY PREMIUM", "SI-DEP", "PMJJBY",
     ]),
     ("Donations / Religious", [
         "SARVEDYNABASAYYA", "VEERANJANEYARELIGIO", "VEERANJANEYA", "RELIGIO", "SEVA",
     ]),
     ("Bank Charges / Interest", [
         "INTEREST PAID", "IB BILLPAY", "HDFC BANK LIMITED", "CHARGES", " FEE ",
-        "NEFT CHARGES", "SMS CHARGES", "INCHGS",
+        "NEFT CHARGES", "SMS CHARGES", "INCHGS", "ANNUALFEE",
     ]),
     ("Groceries", [
         "SANNARANGEGOWDA", "APOORVAFRUITS",
@@ -76,7 +79,7 @@ DEFAULT_CATEGORY_RULES = [
     ]),
     ("Transport", [
         "BMTC", "UPI-BMTCBUS", "BMRCL", "NCMC", "METRO", "NWKRTC", "UBER", "RAPIDO", "OLA",
-        "BAGMANE", "MYBMTCDQR",
+        "BAGMANE", "MYBMTCDQR", "IRCTCTOURISM1P", "INDIANRAILWAY",
     ]),
     ("General UPI / Shopping", [
         "AMAZON", "AMAZONUPI", "FLIPKART", "BLINKIT", "MYNTRA", "DECATHLON", "RELIANCE RETAIL",
@@ -91,7 +94,7 @@ DEFAULT_CATEGORY_RULES = [
     ("Entertainment / Subscriptions", [
         "GOOGLE PLAY", "PLAYSTORE", "PVR", "BIGTREE", "BOOKMYSHOW",
         "PRIME VIDEO", "PRIMEVIDEO", "AUTOPAY-PRIMEVIDEO", "NETFLIX", "SPOTIFY",
-        "TAGMANGO", "GEEKSFORGEEKS", "HABUILD",
+        "TAGMANGO", "GEEKSFORGEEKS", "HABUILD", "ZEEENTERTAI",
     ]),
     ("Utilities / Recharge", [
         "AIRTEL", "JIO", "VODAFONE", "RECHARGE", "ELECTRICITY", "ELECTRICIT",
@@ -104,13 +107,27 @@ DEFAULT_CATEGORY_RULES = [
         "ZEESWIMACADEMY", "SWIM ACADEMY", "SWIMMING FEES",
     ]),
     ("Education / Fees", [
-        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL",
+        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL", "NIELITCALICUT",
     ]),
 ]
 
 DEFAULT_TRANSPORT_PATTERNS = [
     r"\bKA\d{2}[A-Z]{1,2}\d{4}\b",
 ]
+
+DEFAULT_CATEGORY_PATTERNS = {
+    "Investments - PPF": [
+        r"\bPPF\b",
+        r"PPF[\s_-]*(?:DEPOSIT|A/?C|ACCOUNT)",
+    ],
+    "Friends": [
+        r"SOUMYATAPAS[\s_-]*HETTI",
+        r"SOUMYA[\s_-]*TAPASHETTI",
+    ],
+    "Bank Charges / Interest": [
+        r"\bINT[.\s_-]*PD\b",
+    ],
+}
 
 
 def load_category_config():
@@ -120,18 +137,19 @@ def load_category_config():
             data = json.loads(CONFIG_JSON_PATH.read_text(encoding="utf-8"))
             rules = [(cat["name"], cat["keywords"]) for cat in data.get("categories", [])]
             patterns = data.get("transport_narration_patterns", DEFAULT_TRANSPORT_PATTERNS)
+            category_patterns = data.get("category_patterns", DEFAULT_CATEGORY_PATTERNS)
             heuristics = data.get("transport_heuristics", {})
-            return rules, patterns, heuristics
+            return rules, patterns, category_patterns, heuristics
         except Exception as e:
             print(f"Warning: Could not read {CONFIG_JSON_PATH}: {e}. Using default rules.")
-    return DEFAULT_CATEGORY_RULES, DEFAULT_TRANSPORT_PATTERNS, {
+    return DEFAULT_CATEGORY_RULES, DEFAULT_TRANSPORT_PATTERNS, DEFAULT_CATEGORY_PATTERNS, {
         "morning_start_hour": 8, "morning_start_minute": 0,
         "morning_end_hour": 11, "morning_end_minute": 0,
         "daily_min_amount": 40.0, "daily_max_amount": 120.0
     }
 
 
-CATEGORY_RULES, TRANSPORT_NARRATION_PATTERNS, TRANSPORT_HEURISTICS = load_category_config()
+CATEGORY_RULES, TRANSPORT_NARRATION_PATTERNS, CATEGORY_PATTERNS, TRANSPORT_HEURISTICS = load_category_config()
 
 MORNING_TRANSPORT_START = time(
     TRANSPORT_HEURISTICS.get("morning_start_hour", 8),
@@ -204,15 +222,18 @@ def classify_category(narration: str, transaction_time: time | None = None) -> s
     n = narration.upper()
     if any(re.search(pattern, n) for pattern in TRANSPORT_NARRATION_PATTERNS):
         return "Transport"
+    for category, patterns in CATEGORY_PATTERNS.items():
+        if any(re.search(pattern, n) for pattern in patterns):
+            return category
+    for category, keywords in CATEGORY_RULES:
+        if any(kw in n for kw in keywords):
+            return category
     if (
         re.search(r"(?:^|[\s:/-])UPI[-/]", n)
         and transaction_time is not None
         and MORNING_TRANSPORT_START <= transaction_time < MORNING_TRANSPORT_END
     ):
         return "Transport"
-    for category, keywords in CATEGORY_RULES:
-        if any(kw in n for kw in keywords):
-            return category
     if "NEFT CR" in n or "CREDIT" in n or " CR " in n or "SALARY" in n:
         return "Salary / Income"
     if "NEFT DR" in n:

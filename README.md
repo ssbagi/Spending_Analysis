@@ -64,30 +64,87 @@ BANK/
 
 ## 🚀 Quick Start & Usage
 
-### 1. Installation
+### 1. Set Up the Python Environment
+From the repository root (`D:\Certificates\BANK`), create or use the workspace virtual environment:
 ```powershell
-pip install pandas openpyxl xlsxwriter pdfplumber
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install pandas openpyxl xlsxwriter pdfplumber
 ```
 
-### 2. Run Master Consolidated Multi-Bank Parser (Recommended)
-Automatically scans all PDFs in `BANK_STATEMENT/`, deduplicates overlapping uploads, and outputs reports:
+If `.venv` already exists, install only the dependencies:
 ```powershell
-python SRC_CODES/CONSOLIDATED_BANK_STATEMENT_PARSER.py
+.\.venv\Scripts\python.exe -m pip install pandas openpyxl xlsxwriter pdfplumber
 ```
 
-### 3. Run Individual Bank Parsers
+### 2. Add or Replace Bank Statements
+Place the HDFC and Bank of Baroda PDF statements in `BANK_STATEMENT/`. The master parser automatically scans every `.pdf` and `.txt` file in that folder.
+
+The Bank of Baroda parser supports wrapped savings-account narrations from the PDF text layer, including transactions that table extraction may split across lines. Opening and closing balance rows are excluded; posted debit and credit transactions are retained.
+
+### 3. Run the Master Consolidated Parser
+This is the normal rerun command. It detects the bank, extracts transactions, applies category rules, deduplicates overlapping statements, and regenerates all consolidated and month-wise reports:
+```powershell
+.\.venv\Scripts\python.exe SRC_CODES\CONSOLIDATED_BANK_STATEMENT_PARSER.py
+```
+
+Optional input and output paths:
+```powershell
+.\.venv\Scripts\python.exe SRC_CODES\CONSOLIDATED_BANK_STATEMENT_PARSER.py `
+  --input BANK_STATEMENT `
+  --output-dir Financial_Reports
+```
+
+The parser reports the number of files found, transactions extracted per bank, duplicates removed, date range, credits, debits, and generated files. A successful run ends with `Consolidated processing and reporting complete!`.
+
+### 4. Run Individual Bank Parsers
 ```powershell
 # HDFC Bank standalone parser
-python SRC_CODES/HDFC_BANK_STATEMENT_PARSER.py --input BANK_STATEMENT/BANK_STATEMENT_HDFC_ACC_1990.pdf
+.\.venv\Scripts\python.exe SRC_CODES\HDFC_BANK_STATEMENT_PARSER.py `
+  --input BANK_STATEMENT\BANK_STATEMENT_HDFC_ACC_1990.pdf
 
 # Bank of Baroda standalone parser
-python SRC_CODES/BOB_BANK_STATEMENT_PARSER.py --input BANK_STATEMENT/BANK_STATEMENT_BANK_OF_BARODA.pdf
+.\.venv\Scripts\python.exe SRC_CODES\BOB_BANK_STATEMENT_PARSER.py `
+  --input BANK_STATEMENT\BANK_STATEMENT_BANK_OF_BARODA_JUNE_2026.pdf
 ```
 
-### 4. Run Deduplication Traffic Testbench
+### 5. Validate Deduplication
 ```powershell
-python SRC_CODES/TRAFFIC_GENERATOR_DEDUPLICATION_TEST.py
+.\.venv\Scripts\python.exe SRC_CODES\TRAFFIC_GENERATOR_DEDUPLICATION_TEST.py
 ```
+
+The testbench should end with `ALL ASSERTIONS PASSED`.
+
+### 6. Find the Generated Reports
+After a successful consolidated run:
+
+```text
+Financial_Reports/Financial_Dashboard_All_Months.html  # Consolidated interactive dashboard
+Financial_Reports/Processing_Log.txt                  # All-bank audit log
+Financial_Reports/Processing_Log_HDFC.txt             # HDFC audit log
+Financial_Reports/Processing_Log_BoB.txt              # Bank of Baroda audit log
+Financial_Reports/YYYY/MM-Month/                       # Monthly Excel, HTML, TXT, and logs
+SRC_LOG/HDFC_BANK_STATEMENT_PARSER.log                # Execution history
+```
+
+Open the consolidated dashboard directly in a browser:
+```powershell
+Start-Process .\Financial_Reports\Financial_Dashboard_All_Months.html
+```
+
+### 7. Customize Transaction Categories
+Add merchant tokens to `SRC_CODES/category_rules.json`. Matching is case-insensitive. Explicit merchant/category rules are evaluated before the generic morning UPI transport heuristic, so known merchants such as mutual funds are not incorrectly categorized as transport.
+
+Examples already supported include:
+
+- `ICCLMF`, `SAFEGOLD`, `APY PREMIUM`, and `PMJJBY` -> `Investments`
+- `SI-DEP` -> `Investments` for standing-instruction deposits
+- PPF narrations matching the configured patterns -> `Investments - PPF`
+- `IRCTCTOURISM1P` and `INDIANRAILWAY` -> `Transport`
+- `ZEEENTERTAI` -> `Entertainment / Subscriptions`
+- `NIELITCALICUT` -> `Education / Fees`
+- `ANNUALFEE` -> `Bank Charges / Interest`
+
+Run the consolidated parser again after changing the rules.
 
 ---
 

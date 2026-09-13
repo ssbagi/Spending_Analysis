@@ -26,11 +26,119 @@ from CATEGORY_CONFIG import (
 )
 
 
+def _extract_bob_transactions_from_text(page_text: str) -> list[dict]:
+    """Extract savings-account rows from BoB's wrapped text layout."""
+    if "Statement of transactions in Savings Account" not in page_text:
+        return []
+
+    lines = [line.strip() for line in page_text.splitlines() if line.strip()]
+    date_pattern = re.compile(r"^(\d{2}-\d{2}-\d{4})\s*(.*)$")
+    transaction_rows = []
+    previous_balance = None
+
+    for index, line in enumerate(lines):
+        match = date_pattern.match(line)
+        if not match:
+            continue
+
+        date_str, date_body = match.groups()
+        balance_match = re.search(r"(\d[\d,]*\.\d{2})\s+(?:Cr|Dr)\s*$", date_body)
+        if not balance_match:
+            continue
+
+        balance = clean_amount(balance_match.group(1))
+        body_without_balance = date_body[:balance_match.start()].strip()
+        if "opening balance" in body_without_balance.lower():
+            previous_balance = balance
+            continue
+        if "closing balance" in body_without_balance.lower():
+            continue
+
+        amount_matches = list(re.finditer(r"\b\d[\d,]*\.\d{2}\b", body_without_balance))
+        if not amount_matches:
+            continue
+
+        amount = clean_amount(amount_matches[-1].group(0))
+        body_narration = body_without_balance[:amount_matches[-1].start()].strip()
+
+        # For wrapped UPI rows, the narration is printed before the date.
+        narration = body_narration
+        if not narration or narration.replace(" ", "").isdigit():
+            narration = ""
+            for prior_line in reversed(lines[:index]):
+                if re.search(r"\b(?:UPI|UDIR)/", prior_line, re.IGNORECASE):
+                    narration = prior_line
+                    break
+                if re.match(r"^\d{2}-\d{2}-\d{4}", prior_line):
+                    break
+
+        # A wrapped continuation such as "ollect" follows the dated row.
+        continuation = []
+        for following_line in lines[index + 1:]:
+            if date_pattern.match(following_line):
+                break
+            if re.search(r"\b(?:UPI|UDIR)/", following_line, re.IGNORECASE):
+                break
+            if following_line.lower().startswith("page "):
+                break
+            continuation.append(following_line)
+        narration = " ".join(part for part in [narration, *continuation] if part).strip()
+
+        if previous_balance is None or amount <= 0:
+            previous_balance = balance
+            continue
+
+        tx_type = "Debit" if balance < previous_balance else "Credit"
+        transaction_rows.append({
+            "date_str": date_str,
+            "narration": narration,
+            "amount": amount,
+            "balance": balance,
+            "type": tx_type,
+        })
+        previous_balance = balance
+
+    return transaction_rows
+
+
 def extract_transactions_from_bob_pdf(pdf_path: str) -> pd.DataFrame:
     """Extract transactions from a Bank of Baroda statement PDF."""
     rows = []
 
     with pdfplumber.open(pdf_path) as pdf:
+        text_rows = []
+        for page in pdf.pages:
+            text_rows.extend(_extract_bob_transactions_from_text(page.extract_text() or ""))
+
+        if text_rows:
+            for item in text_rows:
+                try:
+                    dt = parse_date(item["date_str"])
+                except ValueError:
+                    continue
+                tx_time = extract_time_from_narration(item["narration"])
+                rows.append({
+                    "Date": dt,
+                    "Month": dt.strftime("%B"),
+                    "MonthYear": dt.strftime("%b-%Y"),
+                    "WeekNumberInMonth": week_number_in_month(dt),
+                    "Bank": "Bank of Baroda",
+                    "Narration": item["narration"],
+                    "Category": classify_category(item["narration"], tx_time),
+                    "Type": item["type"],
+                    "Amount (₹)": item["amount"],
+                    "Closing Balance (₹)": item["balance"],
+                    "ChqRefNo": "",
+                })
+
+        if rows:
+            df = pd.DataFrame(rows)
+            df = df[df["Amount (₹)"] > 0]
+            df, _, _ = deduplicate_transactions(df)
+            df.sort_values("Date", inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            return df
+
         for page_idx, page in enumerate(pdf.pages):
             tables = page.extract_tables()
             for table in tables:

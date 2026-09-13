@@ -24,8 +24,14 @@
       "name": "Self / Family Transfer",
       "keywords": [
         "SHREYAS S BAGI", "SHREYASSBAGI", "SHANTESH B BAGI", "SHANTESHBBAGI",
-        "SHANTESH BAGI", "SHANTESH", "SAVITHA SHANTESH", "SAVITHA", "SAHANA SHANTESH",
+        "SHANTESH BAGI", "SHANTESH", "SAVITHA SHANTESH", "SAVITHA", "10811461296", "SAHANA SHANTESH", "9448487633",
         "SAHANA", "NAGARATHNAV MUNDASA", "NAGARATHNAV", "MUNDASA"
+      ]
+    },
+    {
+      "name": "Friends",
+      "keywords": [
+        "SOUMYATAPASHETTI", "PATTED"
       ]
     },
     {
@@ -44,7 +50,7 @@
       "name": "Investments",
       "keywords": [
         "GROWW", "GROWW INVEST", "GROWW.BRK", "UTKARSH SMALL FINANC", "MUTUAL FUND",
-        "ICCLMF", "ICCL", "MF COLLECT"
+        "ICCLMF", "ICCL", "MF COLLECT", "SAFEGOLD", "APY PREMIUM", "SI-DEP", "PMJJBY"
       ]
     },
     {
@@ -57,7 +63,7 @@
       "name": "Bank Charges / Interest",
       "keywords": [
         "INTEREST PAID", "IB BILLPAY", "HDFC BANK LIMITED", "CHARGES", " FEE ",
-        "NEFT CHARGES", "SMS CHARGES", "INCHGS"
+        "NEFT CHARGES", "SMS CHARGES", "INCHGS", "ANNUALFEE"
       ]
     },
     {
@@ -99,7 +105,7 @@
       "name": "Transport",
       "keywords": [
         "BMTC", "UPI-BMTCBUS", "BMRCL", "NCMC", "METRO", "NWKRTC", "UBER", "RAPIDO", "OLA",
-        "BAGMANE", "MYBMTCDQR"
+        "BAGMANE", "MYBMTCDQR", "IRCTCTOURISM1P", "INDIANRAILWAY"
       ]
     },
     {
@@ -126,7 +132,7 @@
       "keywords": [
         "GOOGLE PLAY", "PLAYSTORE", "PVR", "BIGTREE", "BOOKMYSHOW",
         "PRIME VIDEO", "PRIMEVIDEO", "AUTOPAY-PRIMEVIDEO", "NETFLIX", "SPOTIFY",
-        "TAGMANGO", "GEEKSFORGEEKS", "HABUILD"
+        "TAGMANGO", "GEEKSFORGEEKS", "HABUILD", "ZEEENTERTAI"
       ]
     },
     {
@@ -151,13 +157,26 @@
     {
       "name": "Education / Fees",
       "keywords": [
-        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL"
+        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL", "NIELITCALICUT"
       ]
     }
   ],
   "transport_narration_patterns": [
     "\\bKA\\d{2}[A-Z]{1,2}\\d{4}\\b"
   ],
+  "category_patterns": {
+    "Investments - PPF": [
+      "\\bPPF\\b",
+      "PPF[\\s_-]*(?:DEPOSIT|A/?C|ACCOUNT)"
+    ],
+    "Friends": [
+      "SOUMYATAPAS[\\s_-]*HETTI",
+      "SOUMYA[\\s_-]*TAPASHETTI"
+    ],
+    "Bank Charges / Interest": [
+      "\\bINT[.\\s_-]*PD\\b"
+    ]
+  },
   "transport_heuristics": {
     "morning_start_hour": 8,
     "morning_start_minute": 0,
