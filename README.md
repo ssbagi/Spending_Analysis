@@ -36,12 +36,13 @@ Transaction Fingerprint = Date | Bank | Type | Amount | Ref_No (or Closing_Balan
 
 ---
 
-## 🏗️ Project Architecture
+## 🏗️ Project Architecture & Clean Directory Structure
 
 ```
 BANK/
 ├── category_rules.json                # Centralized category rules & keywords (JSON format)
 ├── CATEGORY_CONFIG.py                 # Core classification & deduplication engine
+├── TRANSACTION_DEDUPLICATOR.py        # Generic visited-set graph transaction deduplication engine
 ├── CONSOLIDATED_BANK_STATEMENT_PARSER.py  # Master runner (Scans all banks & aggregates)
 ├── HDFC_BANK_STATEMENT_PARSER.py      # HDFC Bank specific parser
 ├── BOB_BANK_STATEMENT_PARSER.py       # Bank of Baroda specific parser
