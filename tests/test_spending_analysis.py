@@ -139,6 +139,19 @@ class CliTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("missing required fields: category", result.stderr)
 
+    def test_cli_reports_missing_file(self):
+        repo_root = Path(__file__).resolve().parents[1]
+        missing_path = repo_root / "does-not-exist.csv"
+
+        result = subprocess.run(
+            [sys.executable, str(repo_root / "spending_analysis.py"), str(missing_path)],
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Error:", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

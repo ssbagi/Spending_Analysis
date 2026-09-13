@@ -114,7 +114,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with args.csv_file.open(newline="", encoding="utf-8") as handle:
             transactions = load_transactions(handle)
-    except ValueError as exc:
+    except (OSError, ValueError) as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 
