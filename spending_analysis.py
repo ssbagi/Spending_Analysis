@@ -25,6 +25,11 @@ def load_transactions(handle: TextIO) -> list[Transaction]:
         raise ValueError("Transaction data must include a header row.")
 
     normalized_fieldnames = [(field or "").strip().lower() for field in reader.fieldnames]
+    duplicate_fields = sorted({field for field in normalized_fieldnames if field and normalized_fieldnames.count(field) > 1})
+    if duplicate_fields:
+        duplicates = ", ".join(duplicate_fields)
+        raise ValueError(f"Transaction data has duplicate fields after normalization: {duplicates}.")
+
     missing_fields = required_fields.difference(normalized_fieldnames)
     if missing_fields:
         missing = ", ".join(sorted(missing_fields))

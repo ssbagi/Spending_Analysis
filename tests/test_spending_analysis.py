@@ -50,6 +50,12 @@ class LoadTransactionsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Row 2 has more values than headers"):
             load_transactions(handle)
 
+    def test_load_transactions_rejects_duplicate_normalized_headers(self):
+        handle = StringIO("date,description,category,amount, Amount \n2026-09-01,Coffee,Food,-4.50,-4.50\n")
+
+        with self.assertRaisesRegex(ValueError, "duplicate fields after normalization: amount"):
+            load_transactions(handle)
+
 
 class SpendingSummaryTests(unittest.TestCase):
     def test_summarize_transactions_separates_income_and_spending(self):
