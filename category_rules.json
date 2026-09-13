@@ -1,0 +1,169 @@
+{
+  "categories": [
+    {
+      "name": "Salary / Income",
+      "keywords": [
+        "IBMINDIAPRIVATELI", "IBM INDIA PRIVATE", "IBMINDIAPRIVATE", "IBM INDIA",
+        "SALARY", "PAYROLL"
+      ]
+    },
+    {
+      "name": "Rent",
+      "keywords": [
+        "UPI-ASHOKA", "ASHOKA KOTRESHA", "SADHANA AK", " RENT "
+      ]
+    },
+    {
+      "name": "House Maintenance",
+      "keywords": [
+        "KOTRESHA", "HOUSE_MAINT", "MAINTENANCE", "ICIC0000106-VAASTUDEW",
+        "VAASTUDEW", "VAASTUDEW FLOWER", "DEW FLOWER"
+      ]
+    },
+    {
+      "name": "Self / Family Transfer",
+      "keywords": [
+        "SHREYAS S BAGI", "SHREYASSBAGI", "SHANTESH B BAGI", "SHANTESHBBAGI",
+        "SHANTESH BAGI", "SHANTESH", "SAVITHA SHANTESH", "SAVITHA", "SAHANA SHANTESH",
+        "SAHANA", "NAGARATHNAV MUNDASA", "NAGARATHNAV", "MUNDASA"
+      ]
+    },
+    {
+      "name": "Parents / Grandparents / Siblings Spending",
+      "keywords": [
+        "LAKSHMIPATHIG", "UPI-LAKSHMIPATHIG"
+      ]
+    },
+    {
+      "name": "Tax Refund / Tax Payment",
+      "keywords": [
+        "ITDTAX REFUND", "TAX REFUND", "DIRECTTAX", "DTAX-DIRECTTAX"
+      ]
+    },
+    {
+      "name": "Investments",
+      "keywords": [
+        "GROWW", "GROWW INVEST", "GROWW.BRK", "UTKARSH SMALL FINANC", "MUTUAL FUND",
+        "ICCLMF", "ICCL", "MF COLLECT"
+      ]
+    },
+    {
+      "name": "Donations / Religious",
+      "keywords": [
+        "SARVEDYNABASAYYA", "VEERANJANEYARELIGIO", "VEERANJANEYA", "RELIGIO", "SEVA"
+      ]
+    },
+    {
+      "name": "Bank Charges / Interest",
+      "keywords": [
+        "INTEREST PAID", "IB BILLPAY", "HDFC BANK LIMITED", "CHARGES", " FEE ",
+        "NEFT CHARGES", "SMS CHARGES", "INCHGS"
+      ]
+    },
+    {
+      "name": "Groceries",
+      "keywords": [
+        "SANNARANGEGOWDA", "APOORVAFRUITS"
+      ]
+    },
+    {
+      "name": "Tea and Snacks",
+      "keywords": [
+        "OMKARNANDINIMILKP", "UPI-MRSRINIVAS", "MRSRINIVAS"
+      ]
+    },
+    {
+      "name": "Food & Snacks",
+      "keywords": [
+        "HUNGERBOX", "MOULA", "UPI-MOULA", "UDUPI", "NEWUDUPI", "UDUPI GARDEN", "GARDEN", "EATGOOD",
+        "GURUPRASAD", "VEG-PAYTM", "PAAKASHALA", "RAMESHWARAM", "THERAMESHWARAM",
+        "COFFEENIVASA", "MADRASCOFFEE", "DAALCHINI", "NALABHIMAPAKAM", "CHICKEN WONDER",
+        "SOMASHEKHAR", "UPI-SOMASHEKHAR", "Q523974455",
+        "KABULI", "MUDULI-BHARATPE90727093430", "MUDULI-BHARATPE", "MUDULI",
+        "VIHAANFAMILY", "RESTAU", "FAMILYKITCHEN", "KAPOORSCHAAT", "BHANDA",
+        "SHREEENTERPRISES", "RESTAURANT", "HOTEL", "ZOMATO", "PAYZOMATO",
+        "SWIGGY", "MCDONALDS", "DOMINOS", "KITCHEN", "BAKERY", "MAYURABAKERYAND",
+        "SWEET", "BIGMISHRASWEET", "BIRIYANI", "BIRYANI", "COFFEE", "CAFE",
+        "TIFFIN", "MESS", "CATERERS", "FOOD", "DHABA", "BHAVAN", "MART",
+        "HYPER MART", "VEGETABLE", "FRUITS", "VEG-", "PALACE", "SRISAIPALACE",
+        "HOTELASHRAYA", "UPACHA", "APOLLO PHARMAC"
+      ]
+    },
+    {
+      "name": "Petrol / Fuel",
+      "keywords": [
+        "THEFUELHUB", "BABULALKGUPTA", "SATHYASAIFILLINGS", "FILLINGS", "PETROL", "FUEL"
+      ]
+    },
+    {
+      "name": "Transport",
+      "keywords": [
+        "BMTC", "UPI-BMTCBUS", "BMRCL", "NCMC", "METRO", "NWKRTC", "UBER", "RAPIDO", "OLA",
+        "BAGMANE", "MYBMTCDQR"
+      ]
+    },
+    {
+      "name": "General UPI / Shopping",
+      "keywords": [
+        "AMAZON", "AMAZONUPI", "FLIPKART", "BLINKIT", "MYNTRA", "DECATHLON", "RELIANCE RETAIL",
+        "JIOFIBER"
+      ]
+    },
+    {
+      "name": "Copilot AI",
+      "keywords": [
+        "AUTOPAY-GOOGLEPLAY-PLAYSTORE", "AUTOPAY-GOOGLE"
+      ]
+    },
+    {
+      "name": "Credit Bill Payment",
+      "keywords": [
+        "CRED"
+      ]
+    },
+    {
+      "name": "Entertainment / Subscriptions",
+      "keywords": [
+        "GOOGLE PLAY", "PLAYSTORE", "PVR", "BIGTREE", "BOOKMYSHOW",
+        "PRIME VIDEO", "PRIMEVIDEO", "AUTOPAY-PRIMEVIDEO", "NETFLIX", "SPOTIFY",
+        "TAGMANGO", "GEEKSFORGEEKS", "HABUILD"
+      ]
+    },
+    {
+      "name": "Utilities / Recharge",
+      "keywords": [
+        "AIRTEL", "JIO", "VODAFONE", "RECHARGE", "ELECTRICITY", "ELECTRICIT",
+        "PPAUTOPAYEL", "PPAUTOPAYELECTRICIT", "GAS", "BESCOM", "WATER"
+      ]
+    },
+    {
+      "name": "Health / Medical",
+      "keywords": [
+        "PHARMACY", "MEDICAL", "HOSPITAL", "CLINIC", "APOLLO", "APOLLOPHARMACY"
+      ]
+    },
+    {
+      "name": "Swimming",
+      "keywords": [
+        "ZEESWIMACADEMY", "SWIM ACADEMY", "SWIMMING FEES"
+      ]
+    },
+    {
+      "name": "Education / Fees",
+      "keywords": [
+        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL"
+      ]
+    }
+  ],
+  "transport_narration_patterns": [
+    "\\bKA\\d{2}[A-Z]{1,2}\\d{4}\\b"
+  ],
+  "transport_heuristics": {
+    "morning_start_hour": 8,
+    "morning_start_minute": 0,
+    "morning_end_hour": 11,
+    "morning_end_minute": 0,
+    "daily_min_amount": 40.0,
+    "daily_max_amount": 120.0
+  }
+}

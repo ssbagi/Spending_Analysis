@@ -33,6 +33,7 @@ def generate_html_dashboard(
             "isoDate": row["Date"].strftime("%Y-%m-%d"),
             "monthYear": str(row["MonthYear"]),
             "week": int(row.get("WeekNumberInMonth", (row["Date"].day - 1) // 7 + 1)),
+            "bank": str(row.get("Bank", "HDFC Bank")),
             "narration": str(row["Narration"]),
             "category": str(row["Category"]),
             "type": str(row["Type"]),
@@ -41,8 +42,10 @@ def generate_html_dashboard(
             "chq": str(row.get("ChqRefNo", "")),
         })
 
-    # Available categories
+    # Available categories and banks
     all_categories = sorted(list(df["Category"].unique()))
+    all_banks = sorted(list(df["Bank"].unique())) if "Bank" in df.columns else ["HDFC Bank"]
+    has_multi_banks = len(all_banks) > 1
 
     # Build month tabs list: "ALL" + each month
     month_tabs = [{"id": "ALL", "label": "All Months (Overview)"}]
@@ -76,8 +79,9 @@ def generate_html_dashboard(
         "#0891B2", "#BE123C", "#047857", "#B45309"
     ]
 
-    # Category dropdown options
+    # Category and Bank dropdown options
     category_options_html = "".join(f'<option value="{c}">{c}</option>' for c in all_categories)
+    bank_options_html = "".join(f'<option value="{b}">{b}</option>' for b in all_banks)
 
     html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -330,6 +334,10 @@ def generate_html_dashboard(
             background: #d1fae5;
             color: #047857;
         }}
+        .badge-bank {{
+            background: #e0f2fe;
+            color: #0369a1;
+        }}
         .progress-bar-bg {{
             background: #e2e8f0;
             border-radius: 4px;
@@ -487,6 +495,10 @@ def generate_html_dashboard(
                 <span>📝 Categorized Transactions (<span id="txCount">0</span>)</span>
                 <div class="filters">
                     <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search narration, date, amount...">
+                    <select id="bankFilter" class="filter-select">
+                        <option value="">All Accounts</option>
+                        {bank_options_html}
+                    </select>
                     <select id="categoryFilter" class="filter-select">
                         <option value="">All Categories</option>
                         {category_options_html}
@@ -503,6 +515,7 @@ def generate_html_dashboard(
                     <thead>
                         <tr>
                             <th>Date</th>
+                            <th>Account</th>
                             <th>Narration</th>
                             <th>Category</th>
                             <th>Type</th>
@@ -872,7 +885,7 @@ def generate_html_dashboard(
             document.getElementById('txCount').innerText = txList.length;
 
             if (txList.length === 0) {{
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No matching transactions found for this search or filter.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No matching transactions found for this search or filter.</td></tr>';
                 return;
             }}
 
@@ -882,6 +895,7 @@ def generate_html_dashboard(
                 const amtColor = tx.type === 'Debit' ? '#b91c1c' : '#047857';
                 tr.innerHTML = `
                     <td>${{tx.date}}</td>
+                    <td><span class="badge badge-bank">${{tx.bank}}</span></td>
                     <td>${{tx.narration}}</td>
                     <td><span class="badge badge-category">${{tx.category}}</span></td>
                     <td><span class="badge ${{badgeType}}">${{tx.type}}</span></td>
@@ -894,21 +908,26 @@ def generate_html_dashboard(
 
         function applyFilters() {{
             const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            const bank = document.getElementById('bankFilter') ? document.getElementById('bankFilter').value : '';
             const cat = document.getElementById('categoryFilter').value;
             const type = document.getElementById('typeFilter').value;
 
             const baseTxs = getMonthTransactions(currentSelectedMonth);
             const filtered = baseTxs.filter(tx => {{
-                const matchSearch = !search || tx.narration.toLowerCase().includes(search) || tx.date.includes(search) || tx.category.toLowerCase().includes(search) || tx.amount.toString().includes(search);
+                const matchSearch = !search || tx.narration.toLowerCase().includes(search) || tx.date.includes(search) || tx.category.toLowerCase().includes(search) || tx.amount.toString().includes(search) || tx.bank.toLowerCase().includes(search);
+                const matchBank = !bank || tx.bank === bank;
                 const matchCat = !cat || tx.category === cat;
                 const matchType = !type || tx.type === type;
-                return matchSearch && matchCat && matchType;
+                return matchSearch && matchBank && matchCat && matchType;
             }});
 
             renderTransactionsTable(filtered);
         }}
 
         document.getElementById('searchInput').addEventListener('input', applyFilters);
+        if (document.getElementById('bankFilter')) {{
+            document.getElementById('bankFilter').addEventListener('change', applyFilters);
+        }}
         document.getElementById('categoryFilter').addEventListener('change', applyFilters);
         document.getElementById('typeFilter').addEventListener('change', applyFilters);
 

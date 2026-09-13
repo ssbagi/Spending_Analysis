@@ -1,16 +1,14 @@
 """
 HDFC_BANK_STATEMENT_PARSER.py
 
-Parses an HDFC Bank statement PDF (table format: Date | Narration | Chq./Ref.No. |
-Value Dt | Withdrawal Amt. | Deposit Amt. | Closing Balance) and produces a single
-Excel workbooks with categorised transactions, monthly summaries, category
-breakdowns, weekly spending, recurring-payment detection and charts. Reports are
-placed in simple year/month folders, alongside a plain-text summary.
+Parses bank statement PDFs (HDFC Bank, Bank of Baroda, and extensible to any bank)
+or text exports, producing month-wise Excel workbooks with categorized transactions,
+monthly summaries, category breakdowns, weekly spending, recurring-payment detection,
+plain-text audit logs, and interactive month-tabbed HTML dashboards.
 
 Usage:
-    pip install pandas openpyxl xlsxwriter pdfplumber
     python HDFC_BANK_STATEMENT_PARSER.py
-    python HDFC_BANK_STATEMENT_PARSER.py --input BANK_STATEMENT.pdf BANK_STATEMENT.txt --output-dir Financial_Reports
+    python HDFC_BANK_STATEMENT_PARSER.py --input BANK_STATEMENT --output-dir Financial_Reports
 """
 
 import argparse
@@ -21,244 +19,59 @@ from pathlib import Path
 import pandas as pd
 import pdfplumber
 
+from CATEGORY_CONFIG import (
+    CATEGORY_RULES,
+    TRANSPORT_NARRATION_PATTERNS,
+    MORNING_TRANSPORT_START,
+    MORNING_TRANSPORT_END,
+    DAILY_UPI_TRANSPORT_MIN_AMOUNT,
+    DAILY_UPI_TRANSPORT_MAX_AMOUNT,
+    parse_date,
+    clean_amount,
+    week_number_in_month,
+    detect_type,
+    extract_time_from_narration,
+    classify_category,
+    apply_daily_transport_heuristic,
+    extract_merchant_key,
+)
+from BOB_BANK_STATEMENT_PARSER import extract_transactions_from_bob_pdf
 from HTML_REPORT_GENERATOR import generate_html_dashboard
 
-# -----------------------------
-# 1. Category rules (ordered by priority - first match wins)
-# -----------------------------
-
-CATEGORY_RULES = [
-    ("Salary / Income", [
-        "IBMINDIAPRIVATELI", "IBM INDIA PRIVATE", "IBMINDIAPRIVATE", "IBM INDIA", "SALARY", "PAYROLL",
-    ]),
-    ("Rent", [
-        "UPI-ASHOKA", "ASHOKA KOTRESHA", "SADHANA AK", " RENT ",
-    ]),
-    ("House Maintenance", [
-        "KOTRESHA", "HOUSE_MAINT", "MAINTENANCE", "ICIC0000106-VAASTUDEW", "VAASTUDEW",
-        "VAASTUDEW FLOWER", "DEW FLOWER",
-    ]),
-    ("Self / Family Transfer", [
-        "SHREYAS S BAGI", "SHREYASSBAGI", "SHANTESH B BAGI", "SHANTESHBBAGI", "SHANTESH BAGI", "SHANTESH",
-        "SAVITHA SHANTESH", "SAVITHA", "SAHANA SHANTESH", "SAHANA",
-        "NAGARATHNAV MUNDASA", "NAGARATHNAV", "MUNDASA",
-    ]),
-    ("Parents / Grandparents / Siblings Spending", [
-        "LAKSHMIPATHIG", "UPI-LAKSHMIPATHIG",
-    ]),
-    ("Tax Refund / Tax Payment", [
-        "ITDTAX REFUND", "TAX REFUND", "DIRECTTAX", "DTAX-DIRECTTAX",
-    ]),
-    ("Investments", [
-        "GROWW", "GROWW INVEST", "GROWW.BRK", "UTKARSH SMALL FINANC", "MUTUAL FUND",
-    ]),
-    ("Donations / Religious", [
-        "SARVEDYNABASAYYA", "VEERANJANEYARELIGIO", "VEERANJANEYA", "RELIGIO", "SEVA",
-    ]),
-    ("Bank Charges / Interest", [
-        "INTEREST PAID", "IB BILLPAY", "HDFC BANK LIMITED", "CHARGES", " FEE ", "NEFT CHARGES",
-    ]),
-    ("Groceries", [
-        "SANNARANGEGOWDA", "APOORVAFRUITS",
-    ]),
-    ("Tea and Snacks", [
-        "OMKARNANDINIMILKP", "UPI-MRSRINIVAS", "MRSRINIVAS",
-    ]),
-    ("Food & Snacks", [
-        "HUNGERBOX", "MOULA", "UPI-MOULA", "UDUPI", "NEWUDUPI", "UDUPI GARDEN", "GARDEN", "EATGOOD",
-        "GURUPRASAD", "VEG-PAYTM", "PAAKASHALA", "RAMESHWARAM", "THERAMESHWARAM",
-        "COFFEENIVASA", "MADRASCOFFEE", "DAALCHINI", "NALABHIMAPAKAM", "CHICKEN WONDER",
-        "SOMASHEKHAR", "UPI-SOMASHEKHAR",
-        "KABULI", "MUDULI-BHARATPE90727093430", "MUDULI-BHARATPE", "MUDULI",
-        "VIHAANFAMILY", "RESTAU",
-        "FAMILYKITCHEN", "KAPOORSCHAAT", "BHANDA",
-        "SHREEENTERPRISES",
-        "RESTAURANT", "HOTEL", "ZOMATO",
-        "SWIGGY", "MCDONALDS", "DOMINOS", "KITCHEN", "BAKERY", "MAYURABAKERYAND",
-        "SWEET", "BIGMISHRASWEET",
-        "BIRIYANI", "BIRYANI", "COFFEE", "CAFE", "TIFFIN", "MESS", "CATERERS",
-        "FOOD", "DHABA", "BHAVAN", "MART", "HYPER MART", "VEGETABLE",
-        "FRUITS", "VEG-", "PALACE", "SRISAIPALACE", "HOTELASHRAYA", "UPACHA",
-        "APOLLO PHARMAC",
-    ]),
-    ("Petrol / Fuel", [
-        "THEFUELHUB", "BABULALKGUPTA", "SATHYASAIFILLINGS", "FILLINGS", "PETROL", "FUEL",
-    ]),
-    ("Transport", [
-        "BMTC", "UPI-BMTCBUS", "BMRCL", "NCMC", "METRO", "NWKRTC", "UBER", "RAPIDO", "OLA",
-        "BAGMANE",
-    ]),
-    ("General UPI / Shopping", [
-        "AMAZON", "FLIPKART", "BLINKIT", "MYNTRA", "DECATHLON", "RELIANCE RETAIL",
-        "JIOFIBER",
-    ]),
-    ("Copilot AI", [
-        "AUTOPAY-GOOGLEPLAY-PLAYSTORE", "AUTOPAY-GOOGLE",
-    ]),
-    ("Credit Bill Payment", [
-        "CRED",
-    ]),
-    ("Entertainment / Subscriptions", [
-        "GOOGLE PLAY", "PLAYSTORE", "PVR", "BIGTREE", "BOOKMYSHOW",
-        "PRIME VIDEO", "PRIMEVIDEO", "AUTOPAY-PRIMEVIDEO", "NETFLIX", "SPOTIFY",
-        "TAGMANGO", "GEEKSFORGEEKS",
-        "HABUILD",
-    ]),
-    ("Utilities / Recharge", [
-        "AIRTEL", "JIO", "VODAFONE", "RECHARGE", "ELECTRICITY", "GAS",
-    ]),
-    ("Health / Medical", [
-        "PHARMACY", "MEDICAL", "HOSPITAL", "CLINIC", "APOLLO", "APOLLOPHARMACY",
-    ]),
-    ("Swimming", [
-        "ZEESWIMACADEMY", "SWIM ACADEMY", "SWIMMING FEES",
-    ]),
-    ("Education / Fees", [
-        "SCHOOL", "TUITION", "COURSE", "IITMADRAS", "IIT MADRAS", "NPTEL",
-    ]),
-]
-
-TRANSPORT_NARRATION_PATTERNS = [
-    r"\bKA\d{2}[A-Z]{1,2}\d{4}\b",
-]
-MORNING_TRANSPORT_START = time(8, 0)
-MORNING_TRANSPORT_END = time(11, 0)
-DAILY_UPI_TRANSPORT_MIN_AMOUNT = 40.0
-DAILY_UPI_TRANSPORT_MAX_AMOUNT = 120.0
-
 
 # -----------------------------
-# 2. Helpers
+# 1. Bank Type Detection & Extraction
 # -----------------------------
 
-def parse_date(date_str: str) -> datetime:
-    """Accept HDFC statement dates in DD/MM/YY or DD/MM/YYYY format."""
-    value = date_str.strip()
-    for date_format in ("%d/%m/%y", "%d/%m/%Y"):
-        try:
-            return datetime.strptime(value, date_format)
-        except ValueError:
-            continue
-    raise ValueError(f"Unsupported statement date: {value}")
-
-
-def clean_amount(val) -> float:
-    if val is None:
-        return 0.0
-    val = str(val).strip().replace(",", "")
-    if val == "":
-        return 0.0
+def detect_bank_type(pdf_path: str) -> str:
+    """Detect bank type (HDFC vs Bank of Baroda) from PDF content."""
     try:
-        return float(val)
-    except ValueError:
-        return 0.0
+        with pdfplumber.open(pdf_path) as pdf:
+            if not pdf.pages:
+                return "HDFC"
+            first_page_text = (pdf.pages[0].extract_text() or "").upper()
+            if "BARODA" in first_page_text or "SAVINGS ACCOUNT - 7393" in first_page_text or "WITHDRAWAL (DR)" in first_page_text:
+                return "BOB"
+            return "HDFC"
+    except Exception:
+        return "HDFC"
 
-
-def week_number_in_month(dt: datetime) -> int:
-    # Week 1: days 1-7, Week 2: 8-14, Week 3: 15-21, Week 4: 22-28, Week 5: 29-31
-    return (dt.day - 1) // 7 + 1
-
-
-def detect_type(withdrawal: float, deposit: float) -> str:
-    if withdrawal > 0 and deposit == 0:
-        return "Debit"
-    if deposit > 0 and withdrawal == 0:
-        return "Credit"
-    return "Debit" if withdrawal >= deposit else "Credit"
-
-
-def extract_time_from_narration(narration: str) -> time | None:
-    """Extract a transaction time when the statement includes one in narration."""
-    value = narration.upper()
-    match = re.search(r"\b(0?[1-9]|1[0-2])(?::([0-5]\d))?\s*(AM|PM)\b", value)
-    if match:
-        hour = int(match.group(1)) % 12
-        if match.group(3) == "PM":
-            hour += 12
-        return time(hour, int(match.group(2) or 0))
-
-    match = re.search(r"\b([01]\d|2[0-3]):([0-5]\d)\b", value)
-    if match:
-        return time(int(match.group(1)), int(match.group(2)))
-    return None
-
-
-def classify_category(narration: str, transaction_time: time | None = None) -> str:
-    n = narration.upper()
-    if any(re.search(pattern, n) for pattern in TRANSPORT_NARRATION_PATTERNS):
-        return "Transport"
-    if (
-        re.search(r"(?:^|[\s:/-])UPI-", n)
-        and transaction_time is not None
-        and MORNING_TRANSPORT_START <= transaction_time < MORNING_TRANSPORT_END
-    ):
-        return "Transport"
-    for category, keywords in CATEGORY_RULES:
-        if any(kw in n for kw in keywords):
-            return category
-    if "NEFT CR" in n or "CREDIT" in n or " CR " in n:
-        return "Salary / Income"
-    if "NEFT DR" in n:
-        return "General UPI / Shopping"
-    return "Uncategorized"
-
-
-def apply_daily_transport_heuristic(df: pd.DataFrame) -> pd.DataFrame:
-    """Classify the first unknown UPI debit in the daily transport fare range."""
-    if df.empty:
-        return df
-
-    result = df.copy()
-    daily_candidates = result[
-        (result["Category"] == "Uncategorized")
-        & (result["Type"] == "Debit")
-        & result["Narration"].str.contains(r"\bUPI(?:-|/|$)", case=False, na=False, regex=True)
-        & result["Amount (₹)"].between(
-            DAILY_UPI_TRANSPORT_MIN_AMOUNT,
-            DAILY_UPI_TRANSPORT_MAX_AMOUNT,
-            inclusive="both",
-        )
-    ]
-    first_candidate_indices = daily_candidates.groupby(
-        result.loc[daily_candidates.index, "Date"], sort=False
-    ).head(1).index
-    result.loc[first_candidate_indices, "Category"] = "Transport"
-    return result
-
-
-def extract_merchant_key(narration: str) -> str:
-    """Collapse a narration into a recurring-merchant key for detecting repeats."""
-    n = narration.upper()
-    n = re.sub(r"^UPI-", "", n)
-    n = re.sub(r"^NEFT (CR|DR)-", "", n)
-    n = re.sub(r"^REV-UPI-", "", n)
-    token = re.split(r"[@\-]", n)[0]
-    token = re.sub(r"\s+", " ", token).strip()
-    return token or n[:30]
-
-
-# -----------------------------
-# 3. Extract transactions from the PDF
-# -----------------------------
 
 def extract_transactions_from_pdf(pdf_path: str) -> pd.DataFrame:
-    """Extract transactions from HDFC statement PDF with precise coordinate alignment."""
+    """Extract transactions from HDFC statement PDF with coordinate alignment."""
     rows = []
 
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
-            # Extract words in transaction table area (top >= 235 and top <= 760)
             words = [w for w in page.extract_words() if 235 <= w["top"] <= 760]
             if not words:
                 continue
 
-            # Filter out footer artifacts
             words = [
                 w for w in words
                 if not any(k in w["text"] for k in ("GeneratedBy:", "DrCount", "CrCount"))
             ]
 
-            # Anchor: Date words in column 0 (x < 63.5)
             date_words = [
                 w for w in words
                 if w["x0"] < 63.5 and re.match(r"^\d{2}/\d{2}/\d{2}$", w["text"])
@@ -277,7 +90,6 @@ def extract_transactions_from_pdf(pdf_path: str) -> pd.DataFrame:
             dep_words = [w for w in words if 442.5 <= w["x0"] < 515.6]
             cls_words = [w for w in words if 515.6 <= w["x0"]]
 
-            # Carryover narration before the first date on this page belongs to the previous transaction
             if date_words:
                 first_date_top = date_words[0]["top"]
                 pre_words = [w for w in narration_words if w["top"] < first_date_top - 3]
@@ -328,6 +140,7 @@ def extract_transactions_from_pdf(pdf_path: str) -> pd.DataFrame:
                     "Month": dt.strftime("%B"),
                     "MonthYear": dt.strftime("%b-%Y"),
                     "WeekNumberInMonth": week_number_in_month(dt),
+                    "Bank": "HDFC Bank",
                     "Narration": tx_nar,
                     "Category": classify_category(
                         tx_nar, extract_time_from_narration(tx_nar)
@@ -377,6 +190,7 @@ def extract_transactions_from_txt(txt_path: str) -> pd.DataFrame:
             "Month": dt.strftime("%B"),
             "MonthYear": dt.strftime("%b-%Y"),
             "WeekNumberInMonth": week_number_in_month(dt),
+            "Bank": "HDFC Bank",
             "Narration": narration.strip(),
             "Category": classify_category(
                 narration, extract_time_from_narration(narration)
@@ -396,9 +210,12 @@ def extract_transactions_from_txt(txt_path: str) -> pd.DataFrame:
 
 
 def extract_transactions(input_path: str) -> pd.DataFrame:
-    """Read an HDFC statement from a PDF or a pipe/tab-separated text export."""
+    """Auto-detect bank format and extract transactions from a statement file."""
     suffix = Path(input_path).suffix.lower()
     if suffix == ".pdf":
+        bank_type = detect_bank_type(input_path)
+        if bank_type == "BOB":
+            return extract_transactions_from_bob_pdf(input_path)
         return extract_transactions_from_pdf(input_path)
     if suffix == ".txt":
         return extract_transactions_from_txt(input_path)
@@ -426,7 +243,7 @@ def collect_statement_files(input_paths: str | list[str]) -> list[Path]:
 
 
 # -----------------------------
-# 4. Summary builders
+# 2. Summary Builders
 # -----------------------------
 
 def month_sort_key(my: str) -> datetime:
@@ -521,87 +338,8 @@ def build_overview_sheet(df: pd.DataFrame, monthly_summary: pd.DataFrame) -> pd.
 
 
 # -----------------------------
-# 5. Write month-wise reports with charts
+# 3. Formatted Table & Log Helpers
 # -----------------------------
-
-def write_monthly_report(df: pd.DataFrame, output_path: Path, summary_path: Path) -> None:
-    monthly_summary = build_monthly_summary(df)
-    category_by_month = build_category_by_month(df)
-    weekly_spending = build_weekly_spending(df)
-    recurring = build_recurring_payments(df)
-    overview = build_overview_sheet(df, monthly_summary)
-
-    df_out = df.copy()
-    df_out["Date"] = df_out["Date"].dt.strftime("%d-%m-%Y")
-
-    with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
-        overview.to_excel(writer, sheet_name="Overview", index=False)
-        df_out.to_excel(writer, sheet_name="Transactions", index=False)
-        monthly_summary.to_excel(writer, sheet_name="Monthly_Summary", index=False)
-        category_by_month.to_excel(writer, sheet_name="Category_By_Month", index=False)
-        weekly_spending.to_excel(writer, sheet_name="Weekly_Spending", index=False)
-        recurring.to_excel(writer, sheet_name="Recurring_Payments", index=False)
-
-        workbook = writer.book
-
-        # Pie chart: category-wise debit spending for this month.
-        overall_cat = df[df["Type"] == "Debit"].groupby("Category")["Amount (₹)"].sum().reset_index()
-        overall_cat.to_excel(writer, sheet_name="Category_Pie_Data", index=False)
-        pie_sheet = writer.sheets["Category_Pie_Data"]
-        if len(overall_cat) > 0:
-            chart_pie = workbook.add_chart({"type": "pie"})
-            chart_pie.add_series({
-                "name": "Spending by Category",
-                "categories": ["Category_Pie_Data", 1, 0, len(overall_cat), 0],
-                "values": ["Category_Pie_Data", 1, 1, len(overall_cat), 1],
-            })
-            chart_pie.set_title({"name": "Spending by Category (Debits)"})
-            pie_sheet.insert_chart("D2", chart_pie)
-
-        # Combined columns and line: monthly debits, credits, and net change.
-        if len(monthly_summary) > 0:
-            ms_sheet = writer.sheets["Monthly_Summary"]
-            chart_col = workbook.add_chart({"type": "column"})
-            chart_col.add_series({
-                "name": "Total Debits (₹)",
-                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
-                "values": ["Monthly_Summary", 1, 1, len(monthly_summary), 1],
-            })
-            chart_col.add_series({
-                "name": "Total Credits (₹)",
-                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
-                "values": ["Monthly_Summary", 1, 2, len(monthly_summary), 2],
-            })
-            chart_line = workbook.add_chart({"type": "line"})
-            chart_line.add_series({
-                "name": "Net Change (₹)",
-                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
-                "values": ["Monthly_Summary", 1, 3, len(monthly_summary), 3],
-            })
-            chart_col.combine(chart_line)
-            chart_col.set_title({"name": "Monthly Debits, Credits, and Net Change"})
-            chart_col.set_x_axis({"name": "Month"})
-            chart_col.set_y_axis({"name": "Rs."})
-            ms_sheet.insert_chart("G2", chart_col)
-
-        # Line chart: weekly spending pattern
-        if len(weekly_spending) > 0:
-            ws_sheet = writer.sheets["Weekly_Spending"]
-            chart_line = workbook.add_chart({"type": "line"})
-            chart_line.add_series({
-                "name": "Weekly Debit Total (₹)",
-                "values": ["Weekly_Spending", 1, 2, len(weekly_spending), 2],
-            })
-            chart_line.set_title({"name": "Weekly Spending Pattern (Debits)"})
-            chart_line.set_y_axis({"name": "Rs."})
-            ws_sheet.insert_chart("F2", chart_line)
-
-    summary_path.write_text(
-        "HDFC Bank Statement - Category-wise Financial Summary\n" + ("=" * 55) + "\n" +
-        overview.to_csv(index=False, sep="\t"),
-        encoding="utf-8",
-    )
-
 
 def format_ascii_table(df: pd.DataFrame, align_map: dict[str, str] | None = None) -> str:
     """Format DataFrame as a clean, properly-aligned text table with left-aligned text."""
@@ -660,14 +398,93 @@ def build_category_breakdown_table(df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def write_monthly_report(df: pd.DataFrame, output_path: Path, summary_path: Path) -> None:
+    monthly_summary = build_monthly_summary(df)
+    category_by_month = build_category_by_month(df)
+    weekly_spending = build_weekly_spending(df)
+    recurring = build_recurring_payments(df)
+    overview = build_overview_sheet(df, monthly_summary)
+
+    df_out = df.copy()
+    df_out["Date"] = df_out["Date"].dt.strftime("%d-%m-%Y")
+
+    with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
+        overview.to_excel(writer, sheet_name="Overview", index=False)
+        df_out.to_excel(writer, sheet_name="Transactions", index=False)
+        monthly_summary.to_excel(writer, sheet_name="Monthly_Summary", index=False)
+        category_by_month.to_excel(writer, sheet_name="Category_By_Month", index=False)
+        weekly_spending.to_excel(writer, sheet_name="Weekly_Spending", index=False)
+        recurring.to_excel(writer, sheet_name="Recurring_Payments", index=False)
+
+        workbook = writer.book
+
+        # Pie chart: category-wise debit spending
+        overall_cat = df[df["Type"] == "Debit"].groupby("Category")["Amount (₹)"].sum().reset_index()
+        overall_cat.to_excel(writer, sheet_name="Category_Pie_Data", index=False)
+        pie_sheet = writer.sheets["Category_Pie_Data"]
+        if len(overall_cat) > 0:
+            chart_pie = workbook.add_chart({"type": "pie"})
+            chart_pie.add_series({
+                "name": "Spending by Category",
+                "categories": ["Category_Pie_Data", 1, 0, len(overall_cat), 0],
+                "values": ["Category_Pie_Data", 1, 1, len(overall_cat), 1],
+            })
+            chart_pie.set_title({"name": "Spending by Category (Debits)"})
+            pie_sheet.insert_chart("D2", chart_pie)
+
+        # Combined columns and line: monthly debits, credits, and net change
+        if len(monthly_summary) > 0:
+            ms_sheet = writer.sheets["Monthly_Summary"]
+            chart_col = workbook.add_chart({"type": "column"})
+            chart_col.add_series({
+                "name": "Total Debits (₹)",
+                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
+                "values": ["Monthly_Summary", 1, 1, len(monthly_summary), 1],
+            })
+            chart_col.add_series({
+                "name": "Total Credits (₹)",
+                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
+                "values": ["Monthly_Summary", 1, 2, len(monthly_summary), 2],
+            })
+            chart_line = workbook.add_chart({"type": "line"})
+            chart_line.add_series({
+                "name": "Net Change (₹)",
+                "categories": ["Monthly_Summary", 1, 0, len(monthly_summary), 0],
+                "values": ["Monthly_Summary", 1, 3, len(monthly_summary), 3],
+            })
+            chart_col.combine(chart_line)
+            chart_col.set_title({"name": "Monthly Debits, Credits, and Net Change"})
+            chart_col.set_x_axis({"name": "Month"})
+            chart_col.set_y_axis({"name": "Rs."})
+            ms_sheet.insert_chart("G2", chart_col)
+
+        # Line chart: weekly spending pattern
+        if len(weekly_spending) > 0:
+            ws_sheet = writer.sheets["Weekly_Spending"]
+            chart_line = workbook.add_chart({"type": "line"})
+            chart_line.add_series({
+                "name": "Weekly Debit Total (₹)",
+                "values": ["Weekly_Spending", 1, 2, len(weekly_spending), 2],
+            })
+            chart_line.set_title({"name": "Weekly Spending Pattern (Debits)"})
+            chart_line.set_y_axis({"name": "Rs."})
+            ws_sheet.insert_chart("F2", chart_line)
+
+    summary_path.write_text(
+        "Bank Statement - Category-wise Financial Summary\n" + ("=" * 55) + "\n" +
+        overview.to_csv(index=False, sep="\t"),
+        encoding="utf-8",
+    )
+
+
 def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     """Write a readable audit log for every transaction processed in one month."""
-    log_df = df[["Date", "Narration", "Type", "Amount (₹)", "Category"]].copy()
+    cols = ["Date", "Bank", "Narration", "Type", "Amount (₹)", "Category"] if "Bank" in df.columns else ["Date", "Narration", "Type", "Amount (₹)", "Category"]
+    log_df = df[cols].copy()
     log_df["Date"] = log_df["Date"].dt.strftime("%d-%m-%Y")
     log_df["Amount (₹)"] = log_df["Amount (₹)"].map(lambda v: f"{v:,.2f}")
     transport_df = log_df[log_df["Category"] == "Transport"]
 
-    # Uncategorized transactions with amount > 500
     uncategorized_high_mask = (df["Category"] == "Uncategorized") & (df["Amount (₹)"] > 500)
     uncategorized_high_df = log_df[uncategorized_high_mask]
 
@@ -682,6 +499,7 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     }
     tx_align = {
         "Date": "left",
+        "Bank": "left",
         "Narration": "left",
         "Type": "left",
         "Amount (₹)": "right",
@@ -689,7 +507,7 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     }
 
     sections = [
-        f"HDFC BANK STATEMENT PROCESSING LOG - {df['MonthYear'].iloc[0]}",
+        f"BANK STATEMENT PROCESSING LOG - {df['MonthYear'].iloc[0]}",
         "=" * 70,
         f"Transactions processed: {len(df)}",
         f"Transport transactions categorized: {len(transport_df)}",
@@ -711,13 +529,13 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
 
 
 def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
-    """Write a consolidated audit log for all transactions across all months/uploads."""
-    log_df = df[["Date", "Narration", "Type", "Amount (₹)", "Category"]].copy()
+    """Write a consolidated audit log for all transactions across all months and accounts."""
+    cols = ["Date", "Bank", "Narration", "Type", "Amount (₹)", "Category"] if "Bank" in df.columns else ["Date", "Narration", "Type", "Amount (₹)", "Category"]
+    log_df = df[cols].copy()
     log_df["Date"] = log_df["Date"].dt.strftime("%d-%m-%Y")
     log_df["Amount (₹)"] = log_df["Amount (₹)"].map(lambda v: f"{v:,.2f}")
     transport_df = log_df[log_df["Category"] == "Transport"]
 
-    # Uncategorized transactions with amount > 500 across all months
     uncategorized_high_mask = (df["Category"] == "Uncategorized") & (df["Amount (₹)"] > 500)
     uncategorized_high_df = log_df[uncategorized_high_mask]
 
@@ -732,6 +550,7 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     }
     tx_align = {
         "Date": "left",
+        "Bank": "left",
         "Narration": "left",
         "Type": "left",
         "Amount (₹)": "right",
@@ -742,7 +561,6 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     max_date = df["Date"].max().strftime("%d-%m-%Y") if not df.empty else "N/A"
     months_list = ", ".join(sorted(set(df["MonthYear"]), key=month_sort_key))
 
-    # Month-wise breakdown table
     month_summary = []
     for my, mdf in df.groupby("MonthYear", sort=False):
         debits = mdf[mdf["Type"] == "Debit"]["Amount (₹)"].sum()
@@ -751,7 +569,7 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
 
     sections = [
         "======================================================================",
-        "HDFC BANK STATEMENT CONSOLIDATED PROCESSING LOG (ALL MONTHS)",
+        "CONSOLIDATED BANK STATEMENT PROCESSING LOG (ALL ACCOUNTS & MONTHS)",
         "======================================================================",
         f"Date Range: {min_date} to {max_date}",
         f"Months Included: {months_list}",
@@ -789,7 +607,7 @@ def write_execution_log(
     generated_files: list[Path],
     status: str = "SUCCESS",
 ) -> None:
-    """Dump a comprehensive timestamped execution log to HDFC_BANK_STATEMENT_PARSER.log."""
+    """Dump a comprehensive timestamped execution log."""
     timestamp = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     min_date = df["Date"].min().strftime("%d-%m-%Y") if not df.empty else "N/A"
     max_date = df["Date"].max().strftime("%d-%m-%Y") if not df.empty else "N/A"
@@ -808,7 +626,7 @@ def write_execution_log(
 
     log_entry = [
         "=" * 80,
-        "HDFC BANK STATEMENT PARSER - EXECUTION RUN LOG",
+        "BANK STATEMENT PARSER - EXECUTION RUN LOG",
         "=" * 80,
         f"Timestamp         : {timestamp}",
         f"Status            : {status}",
@@ -838,7 +656,6 @@ def write_execution_log(
         "\n",
     ]
 
-    # Append to existing log or create new
     content = "\n".join(log_entry)
     if log_path.exists():
         existing_text = log_path.read_text(encoding="utf-8", errors="replace")
@@ -854,23 +671,26 @@ def write_reports_by_month(df: pd.DataFrame, output_dir: str) -> list[Path]:
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    # Consolidated processing log for all months
+    # Master Consolidated Processing Log
     all_months_log = output_path / "Processing_Log.txt"
     write_all_processing_log(df.copy(), all_months_log)
     generated_reports.append(all_months_log)
     print(f"Created (All Months): {all_months_log}")
 
-    # Consolidated interactive HTML dashboard for all months (Master Family Dashboard)
+    # Master Consolidated Interactive HTML Dashboard
     all_months_html = output_path / "Financial_Dashboard_All_Months.html"
+    min_date = df["Date"].min().strftime("%d-%m-%Y") if not df.empty else "N/A"
+    max_date = df["Date"].max().strftime("%d-%m-%Y") if not df.empty else "N/A"
     generate_html_dashboard(
         df=df.copy(),
         output_html_path=all_months_html,
-        title="HDFC Bank Statement - Comprehensive Financial Dashboard (Feb - Jul 2026)",
-        subtitle="Consolidated 6-Month Interactive Spending & Income Overview",
+        title=f"Bank Statement - Comprehensive Financial Dashboard ({min_date} to {max_date})",
+        subtitle=f"Consolidated Interactive Multi-Account & Spending Overview",
     )
     generated_reports.append(all_months_html)
     print(f"Created (All Months HTML Dashboard): {all_months_html}")
 
+    # Monthly Package Generation
     for month_year, month_df in df.groupby("MonthYear", sort=False):
         report_date = month_sort_key(str(month_year))
         folder = output_path / str(report_date.year) / report_date.strftime("%m-%B")
@@ -884,7 +704,6 @@ def write_reports_by_month(df: pd.DataFrame, output_dir: str) -> list[Path]:
         write_monthly_report(month_df.copy(), excel_path, text_path)
         write_monthly_processing_log(month_df.copy(), log_path)
 
-        # Monthly interactive HTML dashboard
         generate_html_dashboard(
             df=month_df.copy(),
             output_html_path=html_path,
@@ -900,12 +719,12 @@ def write_reports_by_month(df: pd.DataFrame, output_dir: str) -> list[Path]:
 
 
 # -----------------------------
-# 6. Main
+# 4. Main
 # -----------------------------
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Turn HDFC statement PDFs or text exports into easy-to-read month-wise reports."
+        description="Turn Bank Statement PDFs or text exports into consolidated month-wise reports."
     )
     parser.add_argument(
         "--input", "-i", nargs="+", default=["BANK_STATEMENT"],
@@ -934,6 +753,7 @@ def main():
         if extracted.empty:
             print(f"No transactions found in: {input_path}")
             continue
+        print(f"  -> Extracted {len(extracted)} transactions from {Path(input_path).name}")
         transactions.append(extracted)
 
     if not transactions:
@@ -945,14 +765,13 @@ def main():
     transport_count_before_heuristic = (df["Category"] == "Transport").sum()
     df = apply_daily_transport_heuristic(df)
     heuristic_count = (df["Category"] == "Transport").sum() - transport_count_before_heuristic
-    print(f"Extracted {len(df)} transactions spanning {df['MonthYear'].nunique()} month(s).")
+    print(f"Total extracted: {len(df)} transactions spanning {df['MonthYear'].nunique()} month(s) across {df['Bank'].nunique()} account(s).")
     print(f"Daily UPI fare heuristic reclassified {heuristic_count} transaction(s) as Transport.")
-    print("Building month-wise Excel and text reports...")
+    print("Building consolidated month-wise Excel, HTML, and text reports...")
     reports = write_reports_by_month(df, args.output_dir)
     for report in reports:
         print(f"Created: {report}")
 
-    # Automatically write / dump timestamped run details to HDFC_BANK_STATEMENT_PARSER.log
     write_execution_log(
         log_path=log_path,
         input_files=input_files,
@@ -965,3 +784,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
