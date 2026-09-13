@@ -407,6 +407,11 @@ def write_monthly_report(df: pd.DataFrame, output_path: Path, summary_path: Path
 
     df_out = df.copy()
     df_out["Date"] = df_out["Date"].dt.strftime("%d-%m-%Y")
+    # Reorder columns to place Bank near the front if present
+    cols = ["Date", "Bank", "Narration", "Category", "Type", "Amount (₹)", "Closing Balance (₹)", "ChqRefNo"] if "Bank" in df_out.columns else ["Date", "Narration", "Category", "Type", "Amount (₹)", "Closing Balance (₹)", "ChqRefNo"]
+    existing_cols = [c for c in cols if c in df_out.columns]
+    remaining_cols = [c for c in df_out.columns if c not in existing_cols]
+    df_out = df_out[existing_cols + remaining_cols]
 
     with pd.ExcelWriter(output_path, engine="xlsxwriter") as writer:
         overview.to_excel(writer, sheet_name="Overview", index=False)
@@ -477,8 +482,8 @@ def write_monthly_report(df: pd.DataFrame, output_path: Path, summary_path: Path
     )
 
 
-def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
-    """Write a readable audit log for every transaction processed in one month."""
+def write_monthly_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | None = None) -> None:
+    """Write a readable audit log for every transaction processed in one month (optional per-bank filter)."""
     cols = ["Date", "Bank", "Narration", "Type", "Amount (₹)", "Category"] if "Bank" in df.columns else ["Date", "Narration", "Type", "Amount (₹)", "Category"]
     log_df = df[cols].copy()
     log_df["Date"] = log_df["Date"].dt.strftime("%d-%m-%Y")
@@ -506,8 +511,9 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
         "Category": "left",
     }
 
+    bank_header = f" [{bank_name}]" if bank_name else ""
     sections = [
-        f"BANK STATEMENT PROCESSING LOG - {df['MonthYear'].iloc[0]}",
+        f"BANK STATEMENT PROCESSING LOG - {df['MonthYear'].iloc[0]}{bank_header}",
         "=" * 70,
         f"Transactions processed: {len(df)}",
         f"Transport transactions categorized: {len(transport_df)}",
@@ -528,8 +534,8 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path) -> None:
     log_path.write_text("\n".join(sections) + "\n", encoding="utf-8")
 
 
-def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
-    """Write a consolidated audit log for all transactions across all months and accounts."""
+def write_all_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | None = None) -> None:
+    """Write a consolidated audit log for all transactions across all months and accounts (optional per-bank)."""
     cols = ["Date", "Bank", "Narration", "Type", "Amount (₹)", "Category"] if "Bank" in df.columns else ["Date", "Narration", "Type", "Amount (₹)", "Category"]
     log_df = df[cols].copy()
     log_df["Date"] = log_df["Date"].dt.strftime("%d-%m-%Y")
@@ -567,9 +573,10 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path) -> None:
         credits = mdf[mdf["Type"] == "Credit"]["Amount (₹)"].sum()
         month_summary.append(f"  • {my:10s}: {len(mdf):4d} transactions | Debits: Rs. {debits:12,.2f} | Credits: Rs. {credits:12,.2f}")
 
+    bank_header = f" [{bank_name}]" if bank_name else " (ALL ACCOUNTS & MONTHS)"
     sections = [
         "======================================================================",
-        "CONSOLIDATED BANK STATEMENT PROCESSING LOG (ALL ACCOUNTS & MONTHS)",
+        f"CONSOLIDATED BANK STATEMENT PROCESSING LOG{bank_header}",
         "======================================================================",
         f"Date Range: {min_date} to {max_date}",
         f"Months Included: {months_list}",
