@@ -125,11 +125,16 @@ def collect_statement_files(input_paths: str | list[str]) -> list[Path]:
 # 2. Consolidated Report Generation
 # -----------------------------
 
-def generate_all_consolidated_reports(df: pd.DataFrame, output_dir: str) -> list[Path]:
+def generate_all_consolidated_reports(
+    df: pd.DataFrame,
+    output_dir: str,
+    ignored_duplicates: list[dict] | None = None,
+) -> list[Path]:
     """Generate consolidated master reports and month-by-month reports for all bank accounts."""
     generated_reports = []
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+    ignored_duplicates = ignored_duplicates or []
 
     # Helper function to generate clean bank abbreviations for filenames
     def get_bank_code(bname: str) -> str:
@@ -142,7 +147,7 @@ def generate_all_consolidated_reports(df: pd.DataFrame, output_dir: str) -> list
 
     # 1. Consolidated master processing log (All Accounts, All Months)
     all_months_log = output_path / "Processing_Log.txt"
-    write_all_processing_log(df.copy(), all_months_log)
+    write_all_processing_log(df.copy(), all_months_log, ignored_duplicates=ignored_duplicates)
     generated_reports.append(all_months_log)
     print(f"Created (All Accounts Master Log): {all_months_log}")
 
@@ -152,7 +157,8 @@ def generate_all_consolidated_reports(df: pd.DataFrame, output_dir: str) -> list
             b_str = str(bank_name)
             bank_code = get_bank_code(b_str)
             bank_log_path = output_path / f"Processing_Log_{bank_code}.txt"
-            write_all_processing_log(bank_df.copy(), bank_log_path, bank_name=b_str)
+            bank_dups = [d for d in ignored_duplicates if d.get("Bank") == b_str]
+            write_all_processing_log(bank_df.copy(), bank_log_path, bank_name=b_str, ignored_duplicates=bank_dups)
             generated_reports.append(bank_log_path)
             print(f"Created (All Months Log - {b_str}): {bank_log_path}")
 
@@ -226,8 +232,8 @@ def main():
         help="Folder for consolidated and monthly reports (default: Financial_Reports).",
     )
     parser.add_argument(
-        "--log-file", "-l", default="HDFC_BANK_STATEMENT_PARSER.log",
-        help="Path to execution log file (default: HDFC_BANK_STATEMENT_PARSER.log).",
+        "--log-file", "-l", default="SRC_LOG/HDFC_BANK_STATEMENT_PARSER.log",
+        help="Path to execution log file (default: SRC_LOG/HDFC_BANK_STATEMENT_PARSER.log).",
     )
     args = parser.parse_args()
 
@@ -263,7 +269,7 @@ def main():
     df_raw = df_raw[df_raw["Amount (₹)"] > 0].reset_index(drop=True)
 
     # Intelligent Deduplication Algorithm using visited-hash fingerprinting
-    df_master, dup_count = deduplicate_transactions(df_raw)
+    df_master, ignored_duplicates, dup_count = deduplicate_transactions(df_raw)
     if dup_count > 0:
         print(f"  • Deduplication Engine : Detected and removed {dup_count} duplicate/overlapping transaction(s).")
     else:
@@ -291,7 +297,7 @@ def main():
     print("-" * 70 + "\n")
 
     print("Building consolidated Excel, interactive HTML dashboards, and processing logs...")
-    reports = generate_all_consolidated_reports(df_master, args.output_dir)
+    reports = generate_all_consolidated_reports(df_master, args.output_dir, ignored_duplicates=ignored_duplicates)
 
     # Dump master execution log
     write_execution_log(

@@ -84,7 +84,7 @@ def extract_transactions_from_bob_pdf(pdf_path: str) -> pd.DataFrame:
     df = pd.DataFrame(rows)
     if not df.empty:
         df = df[df["Amount (₹)"] > 0]
-        df, _ = deduplicate_transactions(df)
+        df, _, _ = deduplicate_transactions(df)
         df.sort_values("Date", inplace=True)
         df.reset_index(drop=True, inplace=True)
     return df

@@ -535,7 +535,12 @@ def write_monthly_processing_log(df: pd.DataFrame, log_path: Path, bank_name: st
     log_path.write_text("\n".join(sections) + "\n", encoding="utf-8")
 
 
-def write_all_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | None = None) -> None:
+def write_all_processing_log(
+    df: pd.DataFrame,
+    log_path: Path,
+    bank_name: str | None = None,
+    ignored_duplicates: list[dict] | None = None,
+) -> None:
     """Write a consolidated audit log for all transactions across all months and accounts (optional per-bank)."""
     cols = ["Date", "Bank", "Narration", "Type", "Amount (₹)", "Category"] if "Bank" in df.columns else ["Date", "Narration", "Type", "Amount (₹)", "Category"]
     log_df = df[cols].copy()
@@ -563,6 +568,14 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | 
         "Amount (₹)": "right",
         "Category": "left",
     }
+    dup_align = {
+        "Date": "left",
+        "Bank": "left",
+        "Narration": "left",
+        "Type": "left",
+        "Amount (₹)": "right",
+        "Status": "left",
+    }
 
     min_date = df["Date"].min().strftime("%d-%m-%Y") if not df.empty else "N/A"
     max_date = df["Date"].max().strftime("%d-%m-%Y") if not df.empty else "N/A"
@@ -574,6 +587,10 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | 
         credits = mdf[mdf["Type"] == "Credit"]["Amount (₹)"].sum()
         month_summary.append(f"  • {my:10s}: {len(mdf):4d} transactions | Debits: Rs. {debits:12,.2f} | Credits: Rs. {credits:12,.2f}")
 
+    ignored_duplicates = ignored_duplicates or []
+    dup_df = pd.DataFrame(ignored_duplicates) if ignored_duplicates else pd.DataFrame()
+    dup_table_str = format_ascii_table(dup_df, dup_align) if not dup_df.empty else "None (0 duplicates found - all transactions unique)"
+
     bank_header = f" [{bank_name}]" if bank_name else " (ALL ACCOUNTS & MONTHS)"
     sections = [
         "======================================================================",
@@ -584,12 +601,16 @@ def write_all_processing_log(df: pd.DataFrame, log_path: Path, bank_name: str | 
         f"Total Transactions Processed: {len(df)}",
         f"Total Transport Transactions: {len(transport_df)}",
         f"Total Uncategorized (> ₹500 - Needs Classification): {len(uncategorized_high_df)}",
+        f"Total Duplicate Entries Ignored: {len(ignored_duplicates)}",
         "",
         "Month-by-Month Summary:",
         "\n".join(month_summary),
         "",
         "Overall Category Totals (Count and Amount Breakdown):",
         format_ascii_table(category_summary, cat_align),
+        "",
+        "Duplicate Transactions Audit (Already Added -> IGNORED):",
+        dup_table_str,
         "",
         "Uncategorized Transactions (> ₹500 - Needs Classification) (All Months):",
         format_ascii_table(uncategorized_high_df, tx_align),
@@ -665,6 +686,7 @@ def write_execution_log(
     ]
 
     content = "\n".join(log_entry)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     if log_path.exists():
         existing_text = log_path.read_text(encoding="utf-8", errors="replace")
         log_path.write_text(existing_text + "\n" + content, encoding="utf-8")
@@ -673,15 +695,16 @@ def write_execution_log(
     print(f"Logged execution to: {log_path}")
 
 
-def write_reports_by_month(df: pd.DataFrame, output_dir: str) -> list[Path]:
+def write_reports_by_month(df: pd.DataFrame, output_dir: str, ignored_duplicates: list[dict] | None = None) -> list[Path]:
     """Create YYYY/MM-Month folders containing an Excel workbook, text summary, and HTML dashboard."""
     generated_reports = []
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+    ignored_duplicates = ignored_duplicates or []
 
     # Master Consolidated Processing Log
     all_months_log = output_path / "Processing_Log.txt"
-    write_all_processing_log(df.copy(), all_months_log)
+    write_all_processing_log(df.copy(), all_months_log, ignored_duplicates=ignored_duplicates)
     generated_reports.append(all_months_log)
     print(f"Created (All Months): {all_months_log}")
 
@@ -743,8 +766,8 @@ def main():
         help="Folder for YYYY/MM-Month report packages (default: Financial_Reports).",
     )
     parser.add_argument(
-        "--log-file", "-l", default="HDFC_BANK_STATEMENT_PARSER.log",
-        help="Path to execution log file (default: HDFC_BANK_STATEMENT_PARSER.log).",
+        "--log-file", "-l", default="SRC_LOG/HDFC_BANK_STATEMENT_PARSER.log",
+        help="Path to execution log file (default: SRC_LOG/HDFC_BANK_STATEMENT_PARSER.log).",
     )
     args = parser.parse_args()
 
@@ -772,7 +795,7 @@ def main():
     df_raw = df_raw[df_raw["Amount (₹)"] > 0].reset_index(drop=True)
 
     # Intelligent deduplication via visited hash-set algorithm
-    df, dup_count = deduplicate_transactions(df_raw)
+    df, ignored_duplicates, dup_count = deduplicate_transactions(df_raw)
     if dup_count > 0:
         print(f"  • Deduplication Engine: Removed {dup_count} duplicate/overlapping transaction(s).")
 
@@ -782,7 +805,7 @@ def main():
     print(f"Total extracted: {len(df)} transactions spanning {df['MonthYear'].nunique()} month(s) across {df['Bank'].nunique()} account(s).")
     print(f"Daily UPI fare heuristic reclassified {heuristic_count} transaction(s) as Transport.")
     print("Building consolidated month-wise Excel, HTML, and text reports...")
-    reports = write_reports_by_month(df, args.output_dir)
+    reports = write_reports_by_month(df, args.output_dir, ignored_duplicates=ignored_duplicates)
     for report in reports:
         print(f"Created: {report}")
 
