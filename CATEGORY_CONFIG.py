@@ -243,6 +243,57 @@ def apply_daily_transport_heuristic(df: pd.DataFrame) -> pd.DataFrame:
     return result
 
 
+def deduplicate_transactions(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """
+    Intelligent transaction deduplication using a visited hash-set algorithm.
+
+    Handles overlapping statement files (e.g., a 6-month statement and a 1-month statement).
+    Generates a unique deterministic fingerprint for each transaction based on:
+    - Date (YYYY-MM-DD)
+    - Account / Bank
+    - Transaction Type (Debit / Credit)
+    - Exact Amount (₹)
+    - Standardized Narration Key (normalized alphanumeric tokens)
+    - Closing Balance (₹) or Reference/Chq Number
+
+    Returns:
+        tuple[pd.DataFrame, int]: (Deduplicated DataFrame, Number of duplicates removed)
+    """
+    if df.empty:
+        return df, 0
+
+    initial_count = len(df)
+    visited_fingerprints = set()
+    unique_indices = []
+
+    for idx, row in df.iterrows():
+        date_str = row["Date"].strftime("%Y-%m-%d") if hasattr(row["Date"], "strftime") else str(row["Date"])
+        bank_str = str(row.get("Bank", "DEFAULT")).strip().upper()
+        tx_type = str(row.get("Type", "")).strip().upper()
+        amount_val = f"{float(row.get('Amount (₹)', 0)):.2f}"
+        closing_val = f"{float(row.get('Closing Balance (₹)', 0)):.2f}"
+        chq_ref = str(row.get("ChqRefNo", "")).strip().upper()
+
+        # Normalize narration: alphanumeric tokens only, collapsed spaces
+        raw_narr = str(row.get("Narration", "")).upper()
+        norm_narr = re.sub(r"[^A-Z0-9]", " ", raw_narr)
+        norm_narr = " ".join(norm_narr.split())[:60]
+
+        # Primary fingerprint
+        if chq_ref and chq_ref not in ("", "NONE", "0"):
+            fingerprint = f"{date_str}|{bank_str}|{tx_type}|{amount_val}|{chq_ref}"
+        else:
+            fingerprint = f"{date_str}|{bank_str}|{tx_type}|{amount_val}|{closing_val}|{norm_narr}"
+
+        if fingerprint not in visited_fingerprints:
+            visited_fingerprints.add(fingerprint)
+            unique_indices.append(idx)
+
+    deduped_df = df.loc[unique_indices].reset_index(drop=True)
+    duplicates_removed = initial_count - len(deduped_df)
+    return deduped_df, duplicates_removed
+
+
 def extract_merchant_key(narration: str) -> str:
     """Collapse a narration into a recurring-merchant key for detecting repeats."""
     n = narration.upper()

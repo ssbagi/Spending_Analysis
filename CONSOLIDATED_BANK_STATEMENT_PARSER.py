@@ -29,6 +29,7 @@ from CATEGORY_CONFIG import (
     extract_time_from_narration,
     classify_category,
     apply_daily_transport_heuristic,
+    deduplicate_transactions,
     extract_merchant_key,
 )
 from HDFC_BANK_STATEMENT_PARSER import (
@@ -258,8 +259,15 @@ def main():
         return
 
     # Combine all transactions across all accounts
-    df_master = pd.concat(extracted_dfs, ignore_index=True).drop_duplicates().sort_values("Date").reset_index(drop=True)
-    df_master = df_master[df_master["Amount (₹)"] > 0].reset_index(drop=True)
+    df_raw = pd.concat(extracted_dfs, ignore_index=True).sort_values("Date").reset_index(drop=True)
+    df_raw = df_raw[df_raw["Amount (₹)"] > 0].reset_index(drop=True)
+
+    # Intelligent Deduplication Algorithm using visited-hash fingerprinting
+    df_master, dup_count = deduplicate_transactions(df_raw)
+    if dup_count > 0:
+        print(f"  • Deduplication Engine : Detected and removed {dup_count} duplicate/overlapping transaction(s).")
+    else:
+        print("  • Deduplication Engine : 0 duplicates found (all transactions unique).")
 
     # Apply daily transport heuristic
     transport_count_before = (df_master["Category"] == "Transport").sum()

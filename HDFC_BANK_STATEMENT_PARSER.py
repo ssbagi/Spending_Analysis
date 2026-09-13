@@ -33,6 +33,7 @@ from CATEGORY_CONFIG import (
     extract_time_from_narration,
     classify_category,
     apply_daily_transport_heuristic,
+    deduplicate_transactions,
     extract_merchant_key,
 )
 from BOB_BANK_STATEMENT_PARSER import extract_transactions_from_bob_pdf
@@ -767,8 +768,14 @@ def main():
         print("No transactions found. Check the input file paths and statement structure.")
         return
 
-    df = pd.concat(transactions, ignore_index=True).drop_duplicates().sort_values("Date").reset_index(drop=True)
-    df = df[df["Amount (₹)"] > 0].reset_index(drop=True)
+    df_raw = pd.concat(transactions, ignore_index=True).sort_values("Date").reset_index(drop=True)
+    df_raw = df_raw[df_raw["Amount (₹)"] > 0].reset_index(drop=True)
+
+    # Intelligent deduplication via visited hash-set algorithm
+    df, dup_count = deduplicate_transactions(df_raw)
+    if dup_count > 0:
+        print(f"  • Deduplication Engine: Removed {dup_count} duplicate/overlapping transaction(s).")
+
     transport_count_before_heuristic = (df["Category"] == "Transport").sum()
     df = apply_daily_transport_heuristic(df)
     heuristic_count = (df["Category"] == "Transport").sum() - transport_count_before_heuristic
