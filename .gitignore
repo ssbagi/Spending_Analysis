@@ -11,6 +11,12 @@ __pycache__/
 # Logs
 *.log
 
+# Bank Statements & Generated Reports
+BANK_STATEMENT/
+Financial_Reports/
+*.pdf
+*.xlsx
+
 # IDE & Editor
 .vscode/
 .idea/
