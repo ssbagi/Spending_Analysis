@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -23,14 +24,25 @@ def load_transactions(handle: TextIO) -> list[Transaction]:
     if reader.fieldnames is None:
         raise ValueError("Transaction data must include a header row.")
 
-    missing_fields = required_fields.difference(field.strip().lower() for field in reader.fieldnames)
+    normalized_fieldnames = [(field or "").strip().lower() for field in reader.fieldnames]
+    missing_fields = required_fields.difference(normalized_fieldnames)
     if missing_fields:
         missing = ", ".join(sorted(missing_fields))
         raise ValueError(f"Transaction data is missing required fields: {missing}.")
 
     normalized_rows = []
     for row_number, row in enumerate(reader, start=2):
-        normalized_row = {key.strip().lower(): (value or "").strip() for key, value in row.items()}
+        normalized_row = {}
+        for key, value in row.items():
+            if key is None:
+                raise ValueError(f"Row {row_number} has more values than headers.")
+
+            normalized_row[key.strip().lower()] = (value or "").strip()
+
+        for field in required_fields:
+            if not normalized_row.get(field):
+                raise ValueError(f"Missing {field} value on row {row_number}.")
+
         try:
             amount = Decimal(normalized_row["amount"])
         except (InvalidOperation, KeyError) as exc:
@@ -38,9 +50,9 @@ def load_transactions(handle: TextIO) -> list[Transaction]:
 
         normalized_rows.append(
             Transaction(
-                date=normalized_row.get("date", ""),
-                description=normalized_row.get("description", ""),
-                category=normalized_row.get("category", "Uncategorized") or "Uncategorized",
+                date=normalized_row["date"],
+                description=normalized_row["description"],
+                category=normalized_row["category"],
                 amount=amount,
             )
         )
@@ -99,8 +111,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    with args.csv_file.open(newline="", encoding="utf-8") as handle:
-        transactions = load_transactions(handle)
+    try:
+        with args.csv_file.open(newline="", encoding="utf-8") as handle:
+            transactions = load_transactions(handle)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
     print(format_report(summarize_transactions(transactions)))
     return 0

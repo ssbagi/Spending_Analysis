@@ -38,6 +38,18 @@ class LoadTransactionsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing required fields: category"):
             load_transactions(handle)
 
+    def test_load_transactions_rejects_blank_required_values(self):
+        handle = StringIO("date,description,category,amount\n2026-09-01,Coffee,,-4.50\n")
+
+        with self.assertRaisesRegex(ValueError, "Missing category value on row 2"):
+            load_transactions(handle)
+
+    def test_load_transactions_rejects_extra_values(self):
+        handle = StringIO("date,description,category,amount\n2026-09-01,Coffee,Food,-4.50,unexpected\n")
+
+        with self.assertRaisesRegex(ValueError, "Row 2 has more values than headers"):
+            load_transactions(handle)
+
 
 class SpendingSummaryTests(unittest.TestCase):
     def test_summarize_transactions_separates_income_and_spending(self):
@@ -101,6 +113,31 @@ class CliTests(unittest.TestCase):
         self.assertIn("Personal Transactions Summary", result.stdout)
         self.assertIn("Total income: $2000.00", result.stdout)
         self.assertIn("- Housing: $800.00", result.stdout)
+
+    def test_cli_reports_invalid_csv(self):
+        csv_data = textwrap.dedent(
+            """\
+            date,description,amount
+            2026-09-01,Rent,-800.00
+            """
+        )
+        repo_root = Path(__file__).resolve().parents[1]
+
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, encoding="utf-8") as handle:
+            handle.write(csv_data)
+            csv_path = handle.name
+
+        try:
+            result = subprocess.run(
+                [sys.executable, str(repo_root / "spending_analysis.py"), csv_path],
+                capture_output=True,
+                text=True,
+            )
+        finally:
+            Path(csv_path).unlink()
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("missing required fields: category", result.stderr)
 
 
 if __name__ == "__main__":
